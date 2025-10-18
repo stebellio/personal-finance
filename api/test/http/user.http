@@ -1,0 +1,4 @@
+### GET request with parameter
+GET http://localhost:3000/users/1
+Accept: application/json
+

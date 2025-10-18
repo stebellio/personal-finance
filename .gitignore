@@ -1,0 +1,10 @@
+/api/generated/
+/api/prisma/dev.db
+/api/.env
+/.idea/
+/api/prisma/dev.db-journal
+/api/dist/
+/api/node_modules/
+/webapp/node_modules/
+/webapp/environments/.env
+/webapp/.angular/

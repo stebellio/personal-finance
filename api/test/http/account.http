@@ -1,0 +1,19 @@
+### Create
+POST {{host}}/account
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "test",
+  "description": "descr"
+}
+
+### Fetch All
+GET {{host}}/account
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Fetch
+GET {{host}}/account/3
+Authorization: Bearer {{token}}
+Content-Type: application/json

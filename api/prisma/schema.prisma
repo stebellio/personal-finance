@@ -22,10 +22,19 @@ model User {
 }
 
 model Account {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
   userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  closures    Closure[]
+}
+
+model Closure {
+  id        Int      @id @default(autoincrement())
+  amount    Decimal
+  date      DateTime @default(now())
+  accountId Int
+  account   Account  @relation(fields: [accountId], references: [id])
 }

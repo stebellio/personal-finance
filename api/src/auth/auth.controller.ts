@@ -1,5 +1,5 @@
 import {Controller, Post, Body, UseGuards} from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
 
 @Controller('auth')
 export class AuthController {
@@ -7,10 +7,10 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() body: { email: string; password: string;}): Promise<{id: number}> {
-    const user = await this.authService.register(body);
+    const id = await this.authService.register(body);
 
     return {
-      id: user.id
+      id
     };
   }
 

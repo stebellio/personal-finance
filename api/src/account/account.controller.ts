@@ -1,9 +1,10 @@
 import {Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards} from '@nestjs/common';
-import {AccountService} from "./account.service";
-import {AccountPresenter} from "./account.presenter";
+import {AccountService} from "./services/account.service";
+import {AccountPresenter} from "./presenters/account.presenter";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {CurrentUser} from "../auth/currentUser.decorator";
-import type {AuthUser} from "../auth/authUser.model";
+import type {AuthUser} from "../auth/models/authUser.model";
+import {Account} from "./models/account.model";
 
 @Controller('accounts')
 @UseGuards(JwtAuthGuard)
@@ -13,37 +14,28 @@ export class AccountController {
     @Post()
     async create(
         @CurrentUser() user: AuthUser,
-        @Body() body: {name: string; description?: string;}) {
-        const account = await this.accountService.createAccount(
+        @Body() body: {name: string; description?: string;}): Promise<number> {
+        return await this.accountService.createAccount(
             {...body, userId: user.id}
         );
-        return account.id;
     }
 
     @Get()
-    async getAccounts(@CurrentUser() user: AuthUser) {
+    async getAccounts(@CurrentUser() user: AuthUser): Promise<AccountPresenter[]> {
         return (await this.accountService.getAccounts(user.id))
             .map(
-                account => new AccountPresenter(
-                    account.id,
-                    account.name,
-                    account.description ?? ''
-                )
+                account => AccountPresenter.fromModel(account)
             );
     }
 
     @Get('/:id')
-    async getAccount(@CurrentUser() user: AuthUser,@Param('id', ParseIntPipe) id: number) {
+    async getAccount(@CurrentUser() user: AuthUser,@Param('id', ParseIntPipe) id: number): Promise<AccountPresenter> {
         const account = await this.accountService.getAccount(id, user.id);
-        return new AccountPresenter(
-            account.id,
-            account.name,
-            account.description ?? ''
-        );
+        return AccountPresenter.fromModel(account);
     }
 
     @Delete('/:id')
-    async removeAccount(@CurrentUser() user: AuthUser,@Param('id', ParseIntPipe) id: number) {
+    async removeAccount(@CurrentUser() user: AuthUser,@Param('id', ParseIntPipe) id: number): Promise<void> {
         return this.accountService.removeAccount(id, user.id);
     }
 }

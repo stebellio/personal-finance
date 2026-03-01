@@ -1,4 +1,4 @@
 export interface AuthUser {
-    id: number;
-    email: string;
+  id: number;
+  email: string;
 }

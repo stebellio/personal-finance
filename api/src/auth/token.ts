@@ -1,1 +1,1 @@
-export const AUTH_REPOSITORY = 'IAuthRepository';
+export const AUTH_REPOSITORY = "IAuthRepository";

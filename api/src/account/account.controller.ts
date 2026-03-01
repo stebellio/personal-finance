@@ -1,41 +1,58 @@
-import {Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards} from '@nestjs/common';
-import {AccountService} from "./services/account.service";
-import {AccountPresenter} from "./presenters/account.presenter";
-import {JwtAuthGuard} from "../auth/jwt-auth.guard";
-import {CurrentUser} from "../auth/currentUser.decorator";
-import type {AuthUser} from "../auth/models/authUser.model";
-import {Account} from "./models/account.model";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
+import { AccountService } from "./services/account.service";
+import { AccountPresenter } from "./presenters/account.presenter";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { CurrentUser } from "../auth/currentUser.decorator";
+import type { AuthUser } from "../auth/models/authUser.model";
 
-@Controller('accounts')
+@Controller("accounts")
 @UseGuards(JwtAuthGuard)
 export class AccountController {
-    constructor(private readonly accountService: AccountService) {}
+  constructor(private readonly accountService: AccountService) {}
 
-    @Post()
-    async create(
-        @CurrentUser() user: AuthUser,
-        @Body() body: {name: string; description?: string;}): Promise<number> {
-        return await this.accountService.createAccount(
-            {...body, userId: user.id}
-        );
-    }
+  @Post()
+  async create(
+    @CurrentUser() user: AuthUser,
+    @Body() body: { name: string; description?: string },
+  ): Promise<number> {
+    return await this.accountService.createAccount({
+      ...body,
+      userId: user.id,
+    });
+  }
 
-    @Get()
-    async getAccounts(@CurrentUser() user: AuthUser): Promise<AccountPresenter[]> {
-        return (await this.accountService.getAccounts(user.id))
-            .map(
-                account => AccountPresenter.fromModel(account)
-            );
-    }
+  @Get()
+  async getAccounts(
+    @CurrentUser() user: AuthUser,
+  ): Promise<AccountPresenter[]> {
+    return (await this.accountService.getAccounts(user.id)).map((account) =>
+      AccountPresenter.fromModel(account),
+    );
+  }
 
-    @Get('/:id')
-    async getAccount(@CurrentUser() user: AuthUser,@Param('id', ParseIntPipe) id: number): Promise<AccountPresenter> {
-        const account = await this.accountService.getAccount(id, user.id);
-        return AccountPresenter.fromModel(account);
-    }
+  @Get("/:id")
+  async getAccount(
+    @CurrentUser() user: AuthUser,
+    @Param("id", ParseIntPipe) id: number,
+  ): Promise<AccountPresenter> {
+    const account = await this.accountService.getAccount(id, user.id);
+    return AccountPresenter.fromModel(account);
+  }
 
-    @Delete('/:id')
-    async removeAccount(@CurrentUser() user: AuthUser,@Param('id', ParseIntPipe) id: number): Promise<void> {
-        return this.accountService.removeAccount(id, user.id);
-    }
+  @Delete("/:id")
+  async removeAccount(
+    @CurrentUser() user: AuthUser,
+    @Param("id", ParseIntPipe) id: number,
+  ): Promise<void> {
+    return this.accountService.removeAccount(id, user.id);
+  }
 }

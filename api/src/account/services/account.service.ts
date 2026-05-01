@@ -14,8 +14,16 @@ export class AccountService {
     name: string;
     description?: string;
     userId: number;
+    balance?: number;
+    currency?: string;
   }) {
-    return this.accountRepository.create(data);
+    return this.accountRepository.create({
+      name: data.name,
+      description: data.description,
+      userId: data.userId,
+      balance: data.balance ?? 0,
+      currency: data.currency ?? "EUR",
+    });
   }
 
   async getAccount(id: number, userId: number): Promise<Account> {

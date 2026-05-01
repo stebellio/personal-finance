@@ -28,7 +28,13 @@ export class PrismaAccountRepository implements IAccountRepository {
       return null;
     }
 
-    return new Account(model.id, model.name, model.description ?? undefined);
+    return new Account(
+      model.id,
+      model.name,
+      model.balance,
+      model.currency,
+      model.description ?? undefined,
+    );
   }
 
   async findByUserId(userId: number): Promise<Account[]> {
@@ -38,7 +44,13 @@ export class PrismaAccountRepository implements IAccountRepository {
 
     return models.map(
       (model) =>
-        new Account(model.id, model.name, model.description ?? undefined),
+        new Account(
+          model.id,
+          model.name,
+          model.balance,
+          model.currency,
+          model.description ?? undefined,
+        ),
     );
   }
 

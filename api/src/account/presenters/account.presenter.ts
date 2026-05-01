@@ -4,11 +4,21 @@ export class AccountPresenter {
   id: number;
   name: string;
   description?: string;
+  balance?: number;
+  currency?: string;
 
-  constructor(id: number, name: string, description: string) {
+  constructor(
+    id: number,
+    name: string,
+    description: string,
+    balance?: number,
+    currency?: string,
+  ) {
     this.id = id;
     this.name = name;
     this.description = description;
+    this.balance = balance;
+    this.currency = currency;
   }
 
   static fromModel(account: Account): AccountPresenter {
@@ -16,6 +26,8 @@ export class AccountPresenter {
       account.id,
       account.name,
       account.description ?? "",
+      account.balance,
+      account.currency ?? "EUR",
     );
   }
 }

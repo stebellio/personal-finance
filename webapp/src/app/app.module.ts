@@ -1,10 +1,13 @@
-import { NgModule } from '@angular/core';
+import { NgModule, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {AuthInterceptor} from "./core/interceptors/auth.interceptor";
+import {LayoutModule} from "./layout/layout.module";
+import {registerLocaleData} from "@angular/common";
+import localeIt from '@angular/common/locales/it';
+registerLocaleData(localeIt)
 
 @NgModule({
   declarations: [
@@ -13,14 +16,16 @@ import {AuthInterceptor} from "./core/interceptors/auth.interceptor";
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    LayoutModule
   ],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
-    }
+    },
+    { provide: LOCALE_ID, useValue: 'it-IT'},
   ],
   bootstrap: [AppComponent]
 })

@@ -1,0 +1,136 @@
+<section class="accounts">
+  <header class="accounts__header">
+    <div>
+      <p class="accounts__eyebrow">Conti</p>
+      <h1 class="accounts__title">I tuoi <span>conti</span></h1>
+      <p class="accounts__subtitle">Gestisci e monitora tutti i tuoi conti finanziari.</p>
+    </div>
+    <button type="button" class="cta" (click)="openModal()">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Nuovo conto</span>
+    </button>
+  </header>
+
+  <div class="accounts__alert" *ngIf="error" role="alert">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M12 8v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="12" cy="16" r="1" fill="currentColor"/>
+    </svg>
+    <span>{{ error }}</span>
+  </div>
+
+  <div class="accounts__list" *ngIf="!loading; else loadingTpl">
+    <ng-container *ngIf="accounts.length; else emptyTpl">
+      <article class="row" *ngFor="let account of accounts; trackBy: trackById">
+        <div class="row__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 7.5C3 5.567 4.567 4 6.5 4H17a4 4 0 0 1 4 4v9a3 3 0 0 1-3 3H6.5A3.5 3.5 0 0 1 3 16.5v-9Z" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M21 11h-4a2 2 0 1 0 0 4h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="row__info">
+          <h3>{{ account.name }}</h3>
+          <p *ngIf="account.description">{{ account.description }}</p>
+        </div>
+        <div class="row__balance">
+          <span class="row__balance-label">Saldo</span>
+          <span class="row__balance-value">
+            {{ account.balance | currency:account.currency:'symbol':'1.2-2' }}
+          </span>
+        </div>
+      </article>
+    </ng-container>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="accounts__list">
+      <div class="row row--skeleton" *ngFor="let i of [1,2,3]"></div>
+    </div>
+  </ng-template>
+
+  <ng-template #emptyTpl>
+    <div class="empty">
+      <h2>Nessun conto</h2>
+      <p>Non hai ancora creato nessun conto.</p>
+      <button type="button" class="cta cta--ghost" (click)="openModal()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Crea il primo conto</span>
+      </button>
+    </div>
+  </ng-template>
+</section>
+
+<div class="modal" *ngIf="isModalOpen" role="dialog" aria-modal="true" aria-labelledby="newAccountTitle">
+  <div class="modal__backdrop" (click)="closeModal()"></div>
+  <div class="modal__dialog">
+    <header class="modal__header">
+      <div>
+        <p class="modal__eyebrow">Nuovo conto</p>
+        <h2 id="newAccountTitle" class="modal__title">Aggiungi un conto</h2>
+      </div>
+      <button type="button" class="modal__close" (click)="closeModal()" [disabled]="saving" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </header>
+    <form class="modal__form" (ngSubmit)="submitNewAccount()" #accountForm="ngForm" novalidate>
+      <div class="form-field">
+        <label for="account-name">Nome</label>
+        <input
+          id="account-name"
+          type="text"
+          name="name"
+          [(ngModel)]="newAccount.name"
+          placeholder="Es. Conto corrente"
+          autocomplete="off"
+          required
+        />
+      </div>
+        <div class="form-field">
+            <label for="account-name">Saldo</label>
+            <input
+                    id="account-balance"
+                    type="number"
+                    name="balance"
+                    [(ngModel)]="newAccount.balance"
+                    placeholder="Es. 0,00"
+                    autocomplete="off"
+                    required
+            />
+        </div>
+      <div class="form-field">
+        <label for="account-description">Descrizione <span class="form-field__optional">(opzionale)</span></label>
+        <textarea
+          id="account-description"
+          name="description"
+          [(ngModel)]="newAccount.description"
+          placeholder="Aggiungi una breve descrizione"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="modal__alert" *ngIf="saveError" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M12 8v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="12" cy="16" r="1" fill="currentColor"/>
+        </svg>
+        <span>{{ saveError }}</span>
+      </div>
+
+      <div class="modal__actions">
+        <button type="button" class="btn btn--ghost" (click)="closeModal()" [disabled]="saving">Annulla</button>
+        <button type="submit" class="btn btn--primary" [disabled]="saving || accountForm.invalid">
+          <span *ngIf="!saving">Crea conto</span>
+          <span *ngIf="saving">Creazione...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

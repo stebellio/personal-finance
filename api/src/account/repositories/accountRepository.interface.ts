@@ -3,6 +3,8 @@ export interface IAccountRepository {
     name: string;
     description?: string;
     userId: number;
+    balance: number;
+    currency: string;
   }): Promise<number>;
 
   findByIdAndUserId(
@@ -12,6 +14,8 @@ export interface IAccountRepository {
     id: number;
     name: string;
     description?: string;
+    balance: number;
+    currency: string;
   } | null>;
 
   findByUserId(userId: number): Promise<
@@ -19,6 +23,8 @@ export interface IAccountRepository {
       id: number;
       name: string;
       description?: string;
+      balance: number;
+      currency: string;
     }[]
   >;
 

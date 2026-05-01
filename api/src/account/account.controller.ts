@@ -22,9 +22,10 @@ export class AccountController {
   @Post()
   async create(
     @CurrentUser() user: AuthUser,
-    @Body() body: { name: string; description?: string },
+    @Body()
+    body: { name: string; description?: string; currentBalance?: number },
   ): Promise<number> {
-    return await this.accountService.createAccount({
+    return this.accountService.createAccount({
       ...body,
       userId: user.id,
     });

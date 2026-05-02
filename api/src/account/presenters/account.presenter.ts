@@ -1,4 +1,4 @@
-import { Account } from "../models/account.model";
+import { Account, AccountType } from "../models/account.model";
 
 export class AccountPresenter {
   id: number;
@@ -6,11 +6,13 @@ export class AccountPresenter {
   description?: string;
   balance?: number;
   currency?: string;
+  type: AccountType;
 
   constructor(
     id: number,
     name: string,
     description: string,
+    type: AccountType,
     balance?: number,
     currency?: string,
   ) {
@@ -19,6 +21,7 @@ export class AccountPresenter {
     this.description = description;
     this.balance = balance;
     this.currency = currency;
+    this.type = type;
   }
 
   static fromModel(account: Account): AccountPresenter {
@@ -26,6 +29,7 @@ export class AccountPresenter {
       account.id,
       account.name,
       account.description ?? "",
+      account.type,
       account.balance,
       account.currency ?? "EUR",
     );

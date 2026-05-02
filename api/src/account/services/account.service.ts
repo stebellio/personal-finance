@@ -1,7 +1,12 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { ACCOUNT_REPOSITORY } from "../token";
 import type { IAccountRepository } from "../repositories/accountRepository.interface";
-import { Account } from "../models/account.model";
+import { Account, AccountType } from "../models/account.model";
 
 @Injectable()
 export class AccountService {
@@ -16,13 +21,24 @@ export class AccountService {
     userId: number;
     balance?: number;
     currency?: string;
+    type?: AccountType;
   }) {
+    const existingAccount = await this.accountRepository.findByUserIdAndName(
+      data.userId,
+      data.name,
+    );
+
+    if (existingAccount) {
+      throw new ConflictException("Account already exists with this name");
+    }
+
     return this.accountRepository.create({
       name: data.name,
       description: data.description,
       userId: data.userId,
       balance: data.balance ?? 0,
       currency: data.currency ?? "EUR",
+      type: data.type ?? "checking",
     });
   }
 

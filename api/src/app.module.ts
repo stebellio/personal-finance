@@ -4,6 +4,7 @@ import { AppService } from "./app.service";
 import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
 import { AccountModule } from "./account/account.module";
+import { ClosureModule } from "./closure/closure.module";
 import { ConfigModule } from "@nestjs/config";
 
 @Module({
@@ -12,6 +13,7 @@ import { ConfigModule } from "@nestjs/config";
     PrismaModule,
     AuthModule,
     AccountModule,
+    ClosureModule,
   ],
   controllers: [AppController],
   providers: [AppService],

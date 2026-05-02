@@ -23,6 +23,11 @@ const routes: Routes = [
         loadChildren: () =>
           import('./accounts/accounts.module').then(m => m.AccountsModule),
       },
+      {
+        path: 'closures',
+        loadChildren: () =>
+          import('./closures/closures.module').then(m => m.ClosuresModule),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

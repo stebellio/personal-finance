@@ -2,7 +2,7 @@ import { AccountService } from "../../../src/account/services/account.service";
 import Mocked = jest.Mocked;
 import { IAccountRepository } from "../../../src/account/repositories/accountRepository.interface";
 import { mock } from "jest-mock-extended";
-import { NotFoundException } from "@nestjs/common";
+import { ConflictException, NotFoundException } from "@nestjs/common";
 
 describe("Account - AccountService", () => {
   let accountService: AccountService;
@@ -15,6 +15,9 @@ describe("Account - AccountService", () => {
     id: accountId,
     name: "Test Account",
     description: "Description",
+    currency: "EUR",
+    balance: 100,
+    type: "checking" as const,
   };
 
   beforeEach(() => {
@@ -58,12 +61,35 @@ describe("Account - AccountService", () => {
   });
 
   describe("createAccount", () => {
-    it("should call repository create and return the new account id", async () => {
-      const createData = {
+    let createData: {
+      name: string;
+      description?: string | undefined;
+      userId: number;
+      balance?: number | undefined;
+      currency?: string | undefined;
+      type?: "checking" | "saving" | undefined;
+    };
+
+    beforeEach(() => {
+      createData = {
         name: "New Account",
         description: "New Description",
         userId: userId,
+        currency: "EUR",
+        balance: 0,
+        type: "checking",
       };
+    });
+
+    it("should throw if there is an account with same name and userId", () => {
+      mockRepository.findByUserIdAndName.mockResolvedValue(mockAccount);
+
+      void expect(accountService.createAccount(createData)).rejects.toThrow(
+        ConflictException,
+      );
+    });
+
+    it("should call repository create and return the new account id", async () => {
       mockRepository.create.mockResolvedValue(accountId);
 
       const result = await accountService.createAccount(createData);

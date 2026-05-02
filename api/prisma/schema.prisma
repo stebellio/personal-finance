@@ -22,12 +22,27 @@ model User {
 }
 
 model Account {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String?
-  balance     Float    @default(0)
-  currency    String   @default("EUR")
-  createdAt   DateTime @default(now())
+  balance     Float     @default(0)
+  currency    String    @default("EUR")
+  type        String    @default("checking")
+  createdAt   DateTime  @default(now())
   userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  closures    Closure[]
+}
+
+model Closure {
+  id        Int      @id @default(autoincrement())
+  year      Int
+  month     Int
+  amount    Float
+  note      String?
+  createdAt DateTime @default(now())
+  accountId Int
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, year, month])
 }

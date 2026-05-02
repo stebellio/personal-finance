@@ -13,6 +13,7 @@ import { AccountPresenter } from "./presenters/account.presenter";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { CurrentUser } from "../auth/currentUser.decorator";
 import type { AuthUser } from "../auth/models/authUser.model";
+import type { AccountType } from "./models/account.model";
 
 @Controller("accounts")
 @UseGuards(JwtAuthGuard)
@@ -23,7 +24,12 @@ export class AccountController {
   async create(
     @CurrentUser() user: AuthUser,
     @Body()
-    body: { name: string; description?: string; currentBalance?: number },
+    body: {
+      name: string;
+      description?: string;
+      currentBalance?: number;
+      type?: AccountType;
+    },
   ): Promise<number> {
     return this.accountService.createAccount({
       ...body,

@@ -1,16 +1,23 @@
 import { IAccountRepository } from "./accountRepository.interface";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Injectable } from "@nestjs/common";
-import { Account } from "../models/account.model";
+import { Account, AccountType } from "../models/account.model";
+import { Account as PrismaAccount } from "generated/prisma";
+import { IPrismaRepository } from "../../prisma/prismaRepository.interface";
 
 @Injectable()
-export class PrismaAccountRepository implements IAccountRepository {
+export class PrismaAccountRepository
+  implements IAccountRepository, IPrismaRepository<PrismaAccount, Account>
+{
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(data: {
     name: string;
     description?: string;
     userId: number;
+    balance: number;
+    currency: string;
+    type: AccountType;
   }): Promise<number> {
     const model = await this.prismaService.account.create({
       data,
@@ -28,13 +35,7 @@ export class PrismaAccountRepository implements IAccountRepository {
       return null;
     }
 
-    return new Account(
-      model.id,
-      model.name,
-      model.balance,
-      model.currency,
-      model.description ?? undefined,
-    );
+    return this.prismaModelToDomainModel(model);
   }
 
   async findByUserId(userId: number): Promise<Account[]> {
@@ -42,19 +43,43 @@ export class PrismaAccountRepository implements IAccountRepository {
       where: { userId },
     });
 
-    return models.map(
-      (model) =>
-        new Account(
-          model.id,
-          model.name,
-          model.balance,
-          model.currency,
-          model.description ?? undefined,
-        ),
-    );
+    return models.map((model) => this.prismaModelToDomainModel(model));
   }
 
   async remove(id: number): Promise<void> {
     await this.prismaService.account.delete({ where: { id } });
+  }
+
+  async updateBalance(id: number, balance: number): Promise<void> {
+    await this.prismaService.account.update({
+      where: { id },
+      data: { balance },
+    });
+  }
+
+  async findByUserIdAndName(
+    userId: number,
+    name: string,
+  ): Promise<Account | null> {
+    const model = await this.prismaService.account.findFirst({
+      where: { userId, name },
+    });
+
+    if (!model) {
+      return null;
+    }
+
+    return this.prismaModelToDomainModel(model);
+  }
+
+  prismaModelToDomainModel(prismaModel: PrismaAccount): Account {
+    return new Account(
+      prismaModel.id,
+      prismaModel.name,
+      prismaModel.balance,
+      prismaModel.currency,
+      prismaModel.type as AccountType,
+      prismaModel.description ?? undefined,
+    );
   }
 }

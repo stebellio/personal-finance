@@ -1,3 +1,5 @@
+import { Account, AccountType } from "../models/account.model";
+
 export interface IAccountRepository {
   create(data: {
     name: string;
@@ -5,28 +7,16 @@ export interface IAccountRepository {
     userId: number;
     balance: number;
     currency: string;
+    type: AccountType;
   }): Promise<number>;
 
-  findByIdAndUserId(
-    id: number,
-    userId: number,
-  ): Promise<{
-    id: number;
-    name: string;
-    description?: string;
-    balance: number;
-    currency: string;
-  } | null>;
+  findByIdAndUserId(id: number, userId: number): Promise<Account | null>;
 
-  findByUserId(userId: number): Promise<
-    {
-      id: number;
-      name: string;
-      description?: string;
-      balance: number;
-      currency: string;
-    }[]
-  >;
+  findByUserId(userId: number): Promise<Account[]>;
 
   remove(id: number): Promise<void>;
+
+  findByUserIdAndName(userId: number, name: string): Promise<Account | null>;
+
+  updateBalance(id: number, balance: number): Promise<void>;
 }

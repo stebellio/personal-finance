@@ -1,0 +1,26 @@
+services:
+  webapp:
+    image: personal-finance-webapp:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - personal-finance-network
+
+  api:
+    image: personal-finance-api:latest
+    env_file:
+      - ./api/.env
+    volumes:
+      - ./api/prisma/dev.db:/app/prisma/dev.db
+    expose:
+      - "3000"
+    restart: unless-stopped
+    networks:
+      - personal-finance-network
+
+networks:
+  personal-finance-network:
+    driver: bridge

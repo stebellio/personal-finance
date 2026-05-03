@@ -16,7 +16,7 @@ interface NavItem {
 export class SidebarComponent {
   readonly items: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/home' },
-    { label: 'Accounts', icon: 'wallet', route: '/accounts' },
+    { label: 'Conti', icon: 'wallet', route: '/accounts' },
     { label: 'Chiusure', icon: 'closures', route: '/closures' },
   ];
 

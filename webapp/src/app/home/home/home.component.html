@@ -25,6 +25,36 @@
     <span>{{ error }}</span>
   </div>
 
+    <!-- Selettore periodo -->
+    <div class="period-selector">
+        <button
+                *ngFor="let p of periods"
+                [class.active]="selectedPeriod === p.value"
+                (click)="onPeriodChange(p.value)"
+        >
+            {{ p.label }}
+        </button>
+    </div>
+
+    <!-- Grafico -->
+    <div class="chart-container" *ngIf="!loadingChart; else chartSkeleton">
+        <apx-chart
+                [series]="chartOptions.series"
+                [chart]="chartOptions.chart"
+                [xaxis]="chartOptions.xaxis"
+                [yaxis]="chartOptions.yaxis"
+                [stroke]="chartOptions.stroke"
+                [fill]="chartOptions.fill"
+                [colors]="chartOptions.colors"
+                [grid]="chartOptions.grid"
+                [tooltip]="chartOptions.tooltip"
+        ></apx-chart>
+    </div>
+
+    <ng-template #chartSkeleton>
+        <div class="chart-skeleton"></div>
+    </ng-template>
+
   <ng-container *ngIf="loading; else loaded">
     <div class="cards">
       <div class="card card--skeleton" *ngFor="let i of [1,2,3]"></div>

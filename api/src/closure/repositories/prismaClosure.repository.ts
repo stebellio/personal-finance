@@ -44,6 +44,28 @@ export class PrismaClosureRepository
     return models.map((m) => this.prismaModelToDomainModel(m));
   }
 
+  async findByUserIdAndRange(
+    userId: number,
+    start: { year: number; month: number },
+    end: {
+      year: number;
+      month: number;
+    },
+  ): Promise<Closure[]> {
+    const models = await this.prismaService.closure.findMany({
+      where: {
+        account: { userId },
+        OR: [
+          { year: { gt: start.year, lt: end.year } },
+          { year: start.year, month: { gte: start.month } },
+          { year: end.year, month: { lte: end.month } },
+        ],
+      },
+      orderBy: [{ year: "asc" }, { month: "asc" }],
+    });
+    return models.map((m) => this.prismaModelToDomainModel(m));
+  }
+
   async findByUserIdAndPeriod(
     userId: number,
     year: number,

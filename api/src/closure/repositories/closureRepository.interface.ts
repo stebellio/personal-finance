@@ -15,6 +15,12 @@ export interface IClosureRepository {
 
   findByAccountId(accountId: number): Promise<Closure[]>;
 
+  findByUserIdAndRange(
+    userId: number,
+    start: { year: number; month: number },
+    end: { year: number; month: number },
+  ): Promise<Closure[]>;
+
   findByUserIdAndPeriod(
     userId: number,
     year: number,

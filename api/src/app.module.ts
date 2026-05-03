@@ -6,6 +6,7 @@ import { AuthModule } from "./auth/auth.module";
 import { AccountModule } from "./account/account.module";
 import { ClosureModule } from "./closure/closure.module";
 import { ConfigModule } from "@nestjs/config";
+import { AnalyticModule } from './analytic/analytic.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ConfigModule } from "@nestjs/config";
     AuthModule,
     AccountModule,
     ClosureModule,
+    AnalyticModule,
   ],
   controllers: [AppController],
   providers: [AppService],

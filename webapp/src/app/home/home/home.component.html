@@ -25,35 +25,126 @@
     <span>{{ error }}</span>
   </div>
 
-    <!-- Selettore periodo -->
-    <div class="period-selector">
-        <button
-                *ngFor="let p of periods"
-                [class.active]="selectedPeriod === p.value"
-                (click)="onPeriodChange(p.value)"
+  <article class="chart-card">
+    <header class="chart-card__header">
+      <div class="chart-card__heading">
+        <p class="chart-card__eyebrow">Patrimonio netto</p>
+        <span
+          class="chart-card__delta"
+          *ngIf="netWorthDelta !== null && netWorthDeltaPercent !== null"
+          [class.chart-card__delta--up]="isPositiveTrend"
+          [class.chart-card__delta--down]="!isPositiveTrend"
         >
-            {{ p.label }}
+          <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path *ngIf="isPositiveTrend" d="M2.5 7.5L6 4l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path *ngIf="!isPositiveTrend" d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          {{ isPositiveTrend ? '+' : '' }}{{ netWorthDelta | currency:'EUR':'symbol':'1.0-0' }}
+          <span class="chart-card__delta-pct">({{ isPositiveTrend ? '+' : '' }}{{ netWorthDeltaPercent | number:'1.1-1' }}%)</span>
+        </span>
+      </div>
+
+      <div class="period-segmented" role="tablist" aria-label="Seleziona periodo">
+        <button
+          *ngFor="let p of periods"
+          type="button"
+          role="tab"
+          [attr.aria-selected]="selectedPeriod === p.value"
+          [class.is-active]="selectedPeriod === p.value"
+          (click)="onPeriodChange(p.value)"
+        >
+          {{ p.label }}
         </button>
-    </div>
+      </div>
+    </header>
 
-    <!-- Grafico -->
-    <div class="chart-container" *ngIf="!loadingChart; else chartSkeleton">
+    <div class="chart-card__body">
+      <ng-container *ngIf="!loadingChart; else chartSkeleton">
         <apx-chart
-                [series]="chartOptions.series"
-                [chart]="chartOptions.chart"
-                [xaxis]="chartOptions.xaxis"
-                [yaxis]="chartOptions.yaxis"
-                [stroke]="chartOptions.stroke"
-                [fill]="chartOptions.fill"
-                [colors]="chartOptions.colors"
-                [grid]="chartOptions.grid"
-                [tooltip]="chartOptions.tooltip"
+          [series]="chartOptions.series"
+          [chart]="chartOptions.chart"
+          [xaxis]="chartOptions.xaxis"
+          [yaxis]="chartOptions.yaxis"
+          [stroke]="chartOptions.stroke"
+          [fill]="chartOptions.fill"
+          [colors]="chartOptions.colors"
+          [grid]="chartOptions.grid"
+          [tooltip]="chartOptions.tooltip"
+          [dataLabels]="chartOptions.dataLabels"
+          [markers]="chartOptions.markers"
         ></apx-chart>
-    </div>
+      </ng-container>
 
-    <ng-template #chartSkeleton>
-        <div class="chart-skeleton"></div>
-    </ng-template>
+      <ng-template #chartSkeleton>
+        <div class="chart-skeleton" aria-busy="true" aria-live="polite"></div>
+      </ng-template>
+    </div>
+  </article>
+
+  <article class="chart-card allocation-card" *ngIf="!loading && hasPositiveAccounts">
+    <header class="chart-card__header">
+      <div class="chart-card__heading">
+        <p class="chart-card__eyebrow">Composizione del patrimonio</p>
+      </div>
+    </header>
+    <div class="allocation-card__body">
+
+      <div class="allocation-panel">
+        <p class="allocation-panel__title">Per conto</p>
+        <div class="allocation-panel__inner">
+          <div class="allocation-panel__chart">
+            <apx-chart
+              [series]="donutChartOptions.series"
+              [chart]="donutChartOptions.chart"
+              [labels]="donutChartOptions.labels"
+              [colors]="donutChartOptions.colors"
+              [plotOptions]="donutChartOptions.plotOptions"
+              [dataLabels]="donutChartOptions.dataLabels"
+              [legend]="donutChartOptions.legend"
+              [tooltip]="donutChartOptions.tooltip"
+            ></apx-chart>
+          </div>
+          <ul class="allocation-legend">
+            <li *ngFor="let item of allocationItems; let i = index" class="allocation-legend__item">
+              <span class="allocation-legend__dot" [style.background]="allocationColors[i]"></span>
+              <span class="allocation-legend__name">{{ item.name }}</span>
+              <span class="allocation-legend__value">{{ item.balance | currency:'EUR':'symbol':'1.0-0' }}</span>
+              <span class="allocation-legend__pct">{{ item.pct | number:'1.1-1' }}%</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="allocation-card__divider"></div>
+
+      <div class="allocation-panel">
+        <p class="allocation-panel__title">Per tipologia</p>
+        <div class="allocation-panel__inner">
+          <div class="allocation-panel__chart">
+            <apx-chart
+              [series]="donutTypeChartOptions.series"
+              [chart]="donutTypeChartOptions.chart"
+              [labels]="donutTypeChartOptions.labels"
+              [colors]="donutTypeChartOptions.colors"
+              [plotOptions]="donutTypeChartOptions.plotOptions"
+              [dataLabels]="donutTypeChartOptions.dataLabels"
+              [legend]="donutTypeChartOptions.legend"
+              [tooltip]="donutTypeChartOptions.tooltip"
+            ></apx-chart>
+          </div>
+          <ul class="allocation-legend">
+            <li *ngFor="let item of allocationTypeItems; let i = index" class="allocation-legend__item">
+              <span class="allocation-legend__dot" [style.background]="allocationColors[i]"></span>
+              <span class="allocation-legend__name">{{ item.name }}</span>
+              <span class="allocation-legend__value">{{ item.balance | currency:'EUR':'symbol':'1.0-0' }}</span>
+              <span class="allocation-legend__pct">{{ item.pct | number:'1.1-1' }}%</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </article>
 
   <ng-container *ngIf="loading; else loaded">
     <div class="cards">

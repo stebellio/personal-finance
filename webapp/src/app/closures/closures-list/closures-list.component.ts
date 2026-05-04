@@ -11,6 +11,8 @@ interface AccountClosureRow {
   closure?: Closure;
 }
 
+type ModalMode = 'create' | 'edit';
+
 @Component({
   selector: 'app-closures-list',
   templateUrl: './closures-list.component.html',
@@ -39,6 +41,17 @@ export class ClosuresListComponent implements OnInit {
   rows: AccountClosureRow[] = [];
   loading = true;
   error: string | null = null;
+
+  modalRow: AccountClosureRow | null = null;
+  modalMode: ModalMode = 'create';
+  formAmount: number | null = null;
+  formNote = '';
+  saving = false;
+  saveError: string | null = null;
+
+  deleteRow: AccountClosureRow | null = null;
+  deleting = false;
+  deleteError: string | null = null;
 
   constructor(
     private readonly accountService: AccountService,
@@ -70,6 +83,91 @@ export class ClosuresListComponent implements OnInit {
 
   get closedCount(): number {
     return this.rows.filter(r => r.closure).length;
+  }
+
+  openCreateModal(row: AccountClosureRow): void {
+    this.modalMode = 'create';
+    this.modalRow = row;
+    this.formAmount = null;
+    this.formNote = '';
+    this.saveError = null;
+  }
+
+  openEditModal(row: AccountClosureRow): void {
+    this.modalMode = 'edit';
+    this.modalRow = row;
+    this.formAmount = row.closure!.amount;
+    this.formNote = row.closure!.note ?? '';
+    this.saveError = null;
+  }
+
+  closeModal(): void {
+    if (this.saving) return;
+    this.modalRow = null;
+  }
+
+  submitClosure(): void {
+    if (!this.modalRow || this.formAmount === null) return;
+
+    this.saving = true;
+    this.saveError = null;
+
+    const request$ =
+      this.modalMode === 'create'
+        ? this.closureService.createClosure(this.modalRow.account.id, {
+            year: this.selectedYear,
+            month: this.selectedMonth,
+            amount: this.formAmount,
+            note: this.formNote.trim() || undefined,
+          })
+        : this.closureService.updateClosure(this.modalRow.closure!.id, {
+            amount: this.formAmount,
+            note: this.formNote.trim() || null,
+          });
+
+    request$.pipe(finalize(() => (this.saving = false))).subscribe({
+      next: () => {
+        this.modalRow = null;
+        this.loadData();
+      },
+      error: () => {
+        this.saveError =
+          this.modalMode === 'create'
+            ? 'Impossibile salvare la chiusura. Riprova più tardi.'
+            : 'Impossibile aggiornare la chiusura. Riprova più tardi.';
+      },
+    });
+  }
+
+  openDeleteConfirm(row: AccountClosureRow): void {
+    this.deleteRow = row;
+    this.deleteError = null;
+  }
+
+  closeDeleteConfirm(): void {
+    if (this.deleting) return;
+    this.deleteRow = null;
+  }
+
+  confirmDelete(): void {
+    if (!this.deleteRow?.closure) return;
+
+    this.deleting = true;
+    this.deleteError = null;
+
+    this.closureService
+      .deleteClosure(this.deleteRow.closure.id)
+      .pipe(finalize(() => (this.deleting = false)))
+      .subscribe({
+        next: () => {
+          this.deleteRow = null;
+          this.loadData();
+        },
+        error: () => {
+          this.deleteError =
+            'Impossibile eliminare la chiusura. Riprova più tardi.';
+        },
+      });
   }
 
   private loadData(): void {

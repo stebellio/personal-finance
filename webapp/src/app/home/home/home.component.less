@@ -1,11 +1,16 @@
 @primary: #6366f1;
 @primary-dark: #4f46e5;
 @primary-light: #818cf8;
+@accent: #764ba2;
 @text-dark: #1f2937;
 @text-muted: #6b7280;
 @border: #e5e7eb;
+@border-soft: #eef0f7;
 @error: #ef4444;
 @error-bg: #fef2f2;
+@success: #10b981;
+@success-bg: rgba(16, 185, 129, 0.10);
+@danger-soft: rgba(239, 68, 68, 0.10);
 
 :host {
   display: block;
@@ -102,6 +107,250 @@
       border: 1px solid lighten(@error, 25%);
     }
   }
+}
+
+.chart-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px 24px 12px;
+  margin-bottom: 28px;
+  background: #fff;
+  border: 1px solid @border;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(31, 41, 55, 0.05);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: linear-gradient(90deg, @primary 0%, @accent 100%);
+    opacity: 0.85;
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 4px;
+  }
+
+  &__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__eyebrow {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: @text-muted;
+  }
+
+  &__values {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 2px;
+  }
+
+  &__value {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: @text-dark;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  &__delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    &--up {
+      color: @success;
+      background: @success-bg;
+    }
+
+    &--down {
+      color: @error;
+      background: @danger-soft;
+    }
+  }
+
+  &__delta-pct {
+    opacity: 0.75;
+    font-weight: 500;
+  }
+
+  &__subtitle {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: @text-muted;
+  }
+
+  &__body {
+    margin: 0 -8px;
+    min-height: 320px;
+  }
+}
+
+.period-segmented {
+  display: inline-flex;
+  padding: 4px;
+  background: #f3f4f8;
+  border-radius: 12px;
+  gap: 2px;
+  align-self: flex-start;
+
+  button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: @text-muted;
+    padding: 7px 14px;
+    border-radius: 9px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+
+    &:hover:not(.is-active) {
+      color: @text-dark;
+    }
+
+    &:focus-visible {
+      outline: 2px solid @primary-light;
+      outline-offset: 2px;
+    }
+
+    &.is-active {
+      color: #fff;
+      background: linear-gradient(135deg, @primary 0%, @accent 100%);
+      box-shadow: 0 6px 14px rgba(99, 102, 241, 0.28);
+    }
+  }
+}
+
+.allocation-card {
+  &__body {
+    display: flex;
+    align-items: flex-start;
+    padding: 4px 0;
+  }
+
+  &__divider {
+    width: 1px;
+    background: @border-soft;
+    align-self: stretch;
+    margin: 0 28px;
+    flex-shrink: 0;
+  }
+}
+
+.allocation-panel {
+  flex: 1;
+  min-width: 0;
+
+  &__title {
+    margin: 0 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: @text-muted;
+  }
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__chart {
+    flex: 0 0 160px;
+  }
+}
+
+.allocation-legend {
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__item {
+    display: grid;
+    grid-template-columns: 10px 1fr auto auto;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: 13px;
+    font-weight: 500;
+    color: @text-dark;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__value {
+    font-size: 13px;
+    font-weight: 600;
+    color: @text-dark;
+    text-align: right;
+  }
+
+  &__pct {
+    font-size: 12px;
+    color: @text-muted;
+    text-align: right;
+    min-width: 42px;
+  }
+}
+
+.chart-skeleton {
+  height: 320px;
+  border-radius: 14px;
+  margin: 8px 8px 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(99,102,241,0.10) 50%, rgba(255,255,255,0) 100%),
+    #f7f8fc;
+  background-size: 200% 100%, 100% 100%;
+  animation: shimmer 1.4s linear infinite;
 }
 
 .cards {
@@ -279,5 +528,29 @@
   .dashboard {
     &__title { font-size: 22px; }
     &__total { width: 100%; align-items: flex-start; }
+  }
+
+  .chart-card {
+    padding: 20px 18px 10px;
+
+    &__value { font-size: 24px; }
+    &__header { flex-direction: column; align-items: stretch; }
+  }
+
+  .period-segmented {
+    align-self: stretch;
+    justify-content: space-between;
+
+    button { flex: 1; text-align: center; }
+  }
+
+  .allocation-card {
+    &__body { flex-direction: column; }
+    &__divider { width: 100%; height: 1px; margin: 20px 0; }
+  }
+
+  .allocation-panel {
+    &__inner { flex-direction: column; align-items: stretch; }
+    &__chart { flex: none; width: 100%; }
   }
 }

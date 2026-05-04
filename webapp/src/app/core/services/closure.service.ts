@@ -16,4 +16,25 @@ export class ClosureService {
       .set('month', month);
     return this.http.get<Closure[]>(`${this.apiUrl}/closures`, { params });
   }
+
+  createClosure(
+    accountId: number,
+    data: { year: number; month: number; amount: number; note?: string },
+  ): Observable<Closure> {
+    return this.http.post<Closure>(
+      `${this.apiUrl}/accounts/${accountId}/closures`,
+      data,
+    );
+  }
+
+  updateClosure(
+    id: number,
+    data: { amount?: number; note?: string | null },
+  ): Observable<Closure> {
+    return this.http.patch<Closure>(`${this.apiUrl}/closures/${id}`, data);
+  }
+
+  deleteClosure(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/closures/${id}`);
+  }
 }

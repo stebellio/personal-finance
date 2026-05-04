@@ -56,6 +56,23 @@ export class AccountService {
     return this.accountRepository.findByUserId(userId);
   }
 
+  async updateAccount(
+    id: number,
+    userId: number,
+    data: { name?: string; description?: string; type?: AccountType },
+  ): Promise<void> {
+    const account = await this.getAccount(id, userId);
+
+    if (data.name && data.name !== account.name) {
+      const existing = await this.accountRepository.findByUserIdAndName(userId, data.name);
+      if (existing) {
+        throw new ConflictException("Account already exists with this name");
+      }
+    }
+
+    await this.accountRepository.update(account.id, data);
+  }
+
   async removeAccount(id: number, userId: number) {
     const account = await this.getAccount(id, userId);
     await this.accountRepository.remove(account.id);

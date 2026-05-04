@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   UseGuards,
 } from "@nestjs/common";
@@ -53,6 +54,20 @@ export class AccountController {
   ): Promise<AccountPresenter> {
     const account = await this.accountService.getAccount(id, user.id);
     return AccountPresenter.fromModel(account);
+  }
+
+  @Patch("/:id")
+  async updateAccount(
+    @CurrentUser() user: AuthUser,
+    @Param("id", ParseIntPipe) id: number,
+    @Body()
+    body: {
+      name?: string;
+      description?: string;
+      type?: AccountType;
+    },
+  ): Promise<void> {
+    return this.accountService.updateAccount(id, user.id, body);
   }
 
   @Delete("/:id")

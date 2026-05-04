@@ -282,6 +282,10 @@
   text-align: right;
   min-width: 42px;
 }
+.allocation-legend__item--liability .allocation-legend__name,
+.allocation-legend__item--liability .allocation-legend__value {
+  color: #ef4444;
+}
 .chart-skeleton {
   height: 320px;
   border-radius: 14px;

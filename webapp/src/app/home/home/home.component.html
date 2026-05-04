@@ -81,7 +81,7 @@
     </div>
   </article>
 
-  <article class="chart-card allocation-card" *ngIf="!loading && hasPositiveAccounts">
+  <article class="chart-card allocation-card" *ngIf="!loading && hasAllocationData">
     <header class="chart-card__header">
       <div class="chart-card__heading">
         <p class="chart-card__eyebrow">Composizione del patrimonio</p>
@@ -105,8 +105,8 @@
             ></apx-chart>
           </div>
           <ul class="allocation-legend">
-            <li *ngFor="let item of allocationItems; let i = index" class="allocation-legend__item">
-              <span class="allocation-legend__dot" [style.background]="allocationColors[i]"></span>
+            <li *ngFor="let item of allocationItems" class="allocation-legend__item" [class.allocation-legend__item--liability]="item.isLiability">
+              <span class="allocation-legend__dot" [style.background]="item.color"></span>
               <span class="allocation-legend__name">{{ item.name }}</span>
               <span class="allocation-legend__value">{{ item.balance | currency:'EUR':'symbol':'1.0-0' }}</span>
               <span class="allocation-legend__pct">{{ item.pct | number:'1.1-1' }}%</span>
@@ -133,8 +133,8 @@
             ></apx-chart>
           </div>
           <ul class="allocation-legend">
-            <li *ngFor="let item of allocationTypeItems; let i = index" class="allocation-legend__item">
-              <span class="allocation-legend__dot" [style.background]="allocationColors[i]"></span>
+            <li *ngFor="let item of allocationTypeItems" class="allocation-legend__item" [class.allocation-legend__item--liability]="item.isLiability">
+              <span class="allocation-legend__dot" [style.background]="item.color"></span>
               <span class="allocation-legend__name">{{ item.name }}</span>
               <span class="allocation-legend__value">{{ item.balance | currency:'EUR':'symbol':'1.0-0' }}</span>
               <span class="allocation-legend__pct">{{ item.pct | number:'1.1-1' }}%</span>

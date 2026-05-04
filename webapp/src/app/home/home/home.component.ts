@@ -11,6 +11,14 @@ import {Period} from "../../core/enum/period.enum";
 import {AnalyticService} from "../../core/services/analytic.service";
 import {NetWorthPoint} from "../../core/models/netWorthPoint.model";
 
+export interface AllocationItem {
+  name: string;
+  balance: number;
+  pct: number;
+  color: string;
+  isLiability: boolean;
+}
+
 export type DonutChartOptions = {
   series: number[];
   chart: ApexChart;
@@ -56,7 +64,9 @@ export class HomeComponent implements OnInit {
 
   netWorthData: NetWorthPoint[] = [];
   chartOptions: ChartOptions = this.buildChartOptions([], []);
-  readonly allocationColors = ['#6366f1', '#764ba2', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#06b6d4', '#f97316'];
+
+  readonly assetColors = ['#6366f1', '#764ba2', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#06b6d4', '#f97316'];
+  readonly liabilityColors = ['#ef4444', '#f87171', '#fca5a5'];
 
   donutChartOptions: DonutChartOptions = this.buildDonutOptions([]);
   donutTypeChartOptions: DonutChartOptions = this.buildDonutOptions([]);
@@ -110,35 +120,65 @@ export class HomeComponent implements OnInit {
     return (this.netWorthDelta ?? 0) >= 0;
   }
 
-  get hasPositiveAccounts(): boolean {
-    return this.accounts.some(a => (a.balance ?? 0) > 0);
+  get hasAllocationData(): boolean {
+    return this.accounts.some(a => (a.balance ?? 0) > 0) ||
+           this.accounts.some(a => (a.balance ?? 0) < 0 && a.type === 'debit');
   }
 
-  get allocationItems(): { name: string; balance: number; pct: number }[] {
-    return this.toAllocationItems(
-      this.accounts.filter(a => (a.balance ?? 0) > 0).map(a => ({ label: a.name, balance: a.balance ?? 0 }))
-    );
+  get allocationItems(): AllocationItem[] {
+    const assets = this.accounts
+      .filter(a => (a.balance ?? 0) > 0)
+      .map(a => ({ label: a.name, balance: a.balance ?? 0, isLiability: false }));
+    const liabilities = this.accounts
+      .filter(a => (a.balance ?? 0) < 0 && a.type === 'debit')
+      .map(a => ({ label: a.name, balance: Math.abs(a.balance ?? 0), isLiability: true }));
+    return this.toAllocationItems([...assets, ...liabilities]);
   }
 
-  get allocationTypeItems(): { name: string; balance: number; pct: number }[] {
+  get allocationTypeItems(): AllocationItem[] {
     return this.toAllocationItems(this.groupByType(this.accounts));
   }
 
-  private toAllocationItems(items: { label: string; balance: number }[]): { name: string; balance: number; pct: number }[] {
+  private toAllocationItems(
+    items: { label: string; balance: number; isLiability?: boolean }[]
+  ): AllocationItem[] {
     const total = items.reduce((s, i) => s + i.balance, 0);
     if (total === 0) return [];
-    return items.map(i => ({ name: i.label, balance: i.balance, pct: (i.balance / total) * 100 }));
+    let assetIdx = 0;
+    let liabilityIdx = 0;
+    return items.map(i => {
+      const isLiability = i.isLiability ?? false;
+      const color = isLiability
+        ? this.liabilityColors[liabilityIdx++ % this.liabilityColors.length]
+        : this.assetColors[assetIdx++ % this.assetColors.length];
+      return { name: i.label, balance: i.balance, pct: (i.balance / total) * 100, color, isLiability };
+    });
   }
 
-  private groupByType(accounts: Account[]): { label: string; balance: number }[] {
+  private groupByType(accounts: Account[]): { label: string; balance: number; isLiability?: boolean }[] {
     const labels: Record<string, string> = { checking: 'Conto corrente', saving: 'Risparmio', debit: 'Debito' };
-    const map = new Map<string, number>();
+    const assetMap = new Map<string, number>();
+    let liabilityTotal = 0;
+
     for (const a of accounts) {
-      if ((a.balance ?? 0) <= 0) continue;
-      const key = a.type ?? 'checking';
-      map.set(key, (map.get(key) ?? 0) + (a.balance ?? 0));
+      const balance = a.balance ?? 0;
+      if (balance === 0) continue;
+      if (balance > 0) {
+        const key = a.type ?? 'checking';
+        assetMap.set(key, (assetMap.get(key) ?? 0) + balance);
+      } else if (a.type === 'debit') {
+        liabilityTotal += Math.abs(balance);
+      }
     }
-    return Array.from(map.entries()).map(([type, balance]) => ({ label: labels[type] ?? type, balance }));
+
+    const result: { label: string; balance: number; isLiability?: boolean }[] = [];
+    for (const [type, balance] of assetMap) {
+      result.push({ label: labels[type] ?? type, balance });
+    }
+    if (liabilityTotal > 0) {
+      result.push({ label: 'Passività', balance: liabilityTotal, isLiability: true });
+    }
+    return result;
   }
 
   trackById(_: number, account: Account): number {
@@ -163,9 +203,8 @@ export class HomeComponent implements OnInit {
         finalize(() => (this.loading = false)),
     ).subscribe(accounts => {
       this.accounts = accounts;
-      const positive = accounts.filter(a => (a.balance ?? 0) > 0).map(a => ({ label: a.name, balance: a.balance ?? 0 }));
-      this.donutChartOptions = this.buildDonutOptions(positive);
-      this.donutTypeChartOptions = this.buildDonutOptions(this.groupByType(accounts));
+      this.donutChartOptions = this.buildDonutOptions(this.allocationItems);
+      this.donutTypeChartOptions = this.buildDonutOptions(this.allocationTypeItems);
     });
   }
 
@@ -183,7 +222,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  private buildDonutOptions(items: { label: string; balance: number }[]): DonutChartOptions {
+  private buildDonutOptions(items: { name: string; balance: number; color: string }[]): DonutChartOptions {
     return {
       series: items.map(i => i.balance),
       chart: {
@@ -194,8 +233,8 @@ export class HomeComponent implements OnInit {
         animations: { enabled: true, speed: 500 },
         toolbar: { show: false },
       },
-      labels: items.map(i => i.label),
-      colors: this.allocationColors.slice(0, items.length),
+      labels: items.map(i => i.name),
+      colors: items.map(i => i.color),
       plotOptions: {
         pie: {
           donut: { size: '70%', labels: { show: false } },

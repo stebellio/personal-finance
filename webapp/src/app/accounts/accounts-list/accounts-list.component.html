@@ -5,7 +5,7 @@
       <h1 class="accounts__title">I tuoi <span>conti</span></h1>
       <p class="accounts__subtitle">Gestisci e monitora tutti i tuoi conti finanziari.</p>
     </div>
-    <button type="button" class="cta" (click)="openModal()">
+    <button type="button" class="cta" (click)="openCreateModal()">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
@@ -38,6 +38,12 @@
             {{ account.balance | currency:account.currency:'symbol':'1.2-2' }}
           </span>
         </div>
+        <button type="button" class="row__edit-btn" (click)="openEditModal(account)" aria-label="Modifica conto">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </article>
     </ng-container>
   </div>
@@ -52,7 +58,7 @@
     <div class="empty">
       <h2>Nessun conto</h2>
       <p>Non hai ancora creato nessun conto.</p>
-      <button type="button" class="cta cta--ghost" (click)="openModal()">
+      <button type="button" class="cta cta--ghost" (click)="openCreateModal()">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
@@ -62,13 +68,15 @@
   </ng-template>
 </section>
 
-<div class="modal" *ngIf="isModalOpen" role="dialog" aria-modal="true" aria-labelledby="newAccountTitle">
+<div class="modal" *ngIf="isModalOpen" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
   <div class="modal__backdrop" (click)="closeModal()"></div>
   <div class="modal__dialog">
     <header class="modal__header">
       <div>
-        <p class="modal__eyebrow">Nuovo conto</p>
-        <h2 id="newAccountTitle" class="modal__title">Aggiungi un conto</h2>
+        <p class="modal__eyebrow">{{ modalMode === 'create' ? 'Nuovo conto' : 'Modifica conto' }}</p>
+        <h2 id="accountModalTitle" class="modal__title">
+          {{ modalMode === 'create' ? 'Aggiungi un conto' : 'Modifica i dati' }}
+        </h2>
       </div>
       <button type="button" class="modal__close" (click)="closeModal()" [disabled]="saving" aria-label="Chiudi">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -76,37 +84,60 @@
         </svg>
       </button>
     </header>
-    <form class="modal__form" (ngSubmit)="submitNewAccount()" #accountForm="ngForm" novalidate>
+    <form class="modal__form" (ngSubmit)="submitForm()" #accountForm="ngForm" novalidate>
+
+      <div class="form-field">
+        <label>Tipologia</label>
+        <div class="type-selector">
+          <label
+            class="type-option"
+            *ngFor="let t of accountTypes"
+            [class.type-option--active]="formData.type === t.value"
+          >
+            <input
+              type="radio"
+              name="type"
+              [value]="t.value"
+              [(ngModel)]="formData.type"
+            />
+            <app-account-icon [type]="t.value"></app-account-icon>
+            <span>{{ t.label }}</span>
+          </label>
+        </div>
+      </div>
+
       <div class="form-field">
         <label for="account-name">Nome</label>
         <input
           id="account-name"
           type="text"
           name="name"
-          [(ngModel)]="newAccount.name"
+          [(ngModel)]="formData.name"
           placeholder="Es. Conto corrente"
           autocomplete="off"
           required
         />
       </div>
-        <div class="form-field">
-            <label for="account-name">Saldo</label>
-            <input
-                    id="account-balance"
-                    type="number"
-                    name="balance"
-                    [(ngModel)]="newAccount.balance"
-                    placeholder="Es. 0,00"
-                    autocomplete="off"
-                    required
-            />
-        </div>
+
+      <div class="form-field" *ngIf="modalMode === 'create'">
+        <label for="account-balance">Saldo iniziale</label>
+        <input
+          id="account-balance"
+          type="number"
+          name="balance"
+          [(ngModel)]="formData.balance"
+          placeholder="Es. 0,00"
+          autocomplete="off"
+          required
+        />
+      </div>
+
       <div class="form-field">
         <label for="account-description">Descrizione <span class="form-field__optional">(opzionale)</span></label>
         <textarea
           id="account-description"
           name="description"
-          [(ngModel)]="newAccount.description"
+          [(ngModel)]="formData.description"
           placeholder="Aggiungi una breve descrizione"
           rows="3"
         ></textarea>
@@ -124,8 +155,8 @@
       <div class="modal__actions">
         <button type="button" class="btn btn--ghost" (click)="closeModal()" [disabled]="saving">Annulla</button>
         <button type="submit" class="btn btn--primary" [disabled]="saving || accountForm.invalid">
-          <span *ngIf="!saving">Crea conto</span>
-          <span *ngIf="saving">Creazione...</span>
+          <span *ngIf="!saving">{{ modalMode === 'create' ? 'Crea conto' : 'Salva modifiche' }}</span>
+          <span *ngIf="saving">{{ modalMode === 'create' ? 'Creazione...' : 'Salvataggio...' }}</span>
         </button>
       </div>
     </form>

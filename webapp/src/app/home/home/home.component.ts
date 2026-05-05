@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { of } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { ApexAxisChartSeries, ApexChart, ApexXAxis, ApexStroke,
   ApexFill, ApexTooltip, ApexGrid, ApexYAxis, ApexDataLabels, ApexMarkers,
@@ -7,9 +7,10 @@ import { ApexAxisChartSeries, ApexChart, ApexXAxis, ApexStroke,
 import { AuthService } from '../../auth/auth.service';
 import { AccountService } from '../../core/services/account.service';
 import { Account } from '../../core/models/account.model';
-import {Period} from "../../core/enum/period.enum";
-import {AnalyticService} from "../../core/services/analytic.service";
-import {NetWorthPoint} from "../../core/models/netWorthPoint.model";
+import { Period } from "../../core/enum/period.enum";
+import { AnalyticService } from "../../core/services/analytic.service";
+import { NetWorthPoint } from "../../core/models/netWorthPoint.model";
+import { NetWorthProjection } from "../../core/models/netWorthProjection.model";
 
 export interface AllocationItem {
   name: string;
@@ -42,6 +43,7 @@ export type ChartOptions = {
   colors: string[];
   dataLabels: ApexDataLabels;
   markers: ApexMarkers;
+  legend: ApexLegend;
 };
 
 @Component({
@@ -63,7 +65,8 @@ export class HomeComponent implements OnInit {
   selectedPeriod: Period = Period.TRIMESTRAL;
 
   netWorthData: NetWorthPoint[] = [];
-  chartOptions: ChartOptions = this.buildChartOptions([], []);
+  netWorthProjection: NetWorthProjection | null = null;
+  chartOptions: ChartOptions = this.buildChartOptions([], [], null);
 
   readonly assetColors = ['#6366f1', '#764ba2', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#06b6d4', '#f97316'];
   readonly liabilityColors = ['#ef4444', '#f87171', '#fca5a5'];
@@ -211,14 +214,21 @@ export class HomeComponent implements OnInit {
   private loadNetWorthHistory(): void {
     this.loadingChart = true;
 
-    this.analyticsService.getNetWorthHistory(this.selectedPeriod).pipe(
-        catchError(() => of<NetWorthPoint[]>([])),
-        finalize(() => (this.loadingChart = false)),
-    ).subscribe(data => {
-      this.netWorthData = data;
-      const labels = data.map(p => p.label);
-      const values = data.map(p => p.amount);
-      this.chartOptions = this.buildChartOptions(labels, values);
+    forkJoin({
+      history: this.analyticsService.getNetWorthHistory(this.selectedPeriod).pipe(
+        catchError(() => of<NetWorthPoint[]>([]))
+      ),
+      projection: this.analyticsService.getNetWorthProjection(),
+    }).pipe(
+      finalize(() => (this.loadingChart = false)),
+    ).subscribe(({ history, projection }) => {
+      this.netWorthData = history;
+      this.netWorthProjection = projection;
+      this.chartOptions = this.buildChartOptions(
+        history.map(p => p.label),
+        history.map(p => p.amount),
+        projection,
+      );
     });
   }
 
@@ -254,11 +264,40 @@ export class HomeComponent implements OnInit {
     };
   }
 
-  private buildChartOptions(labels: string[], values: (number | null)[]): ChartOptions {
+  private buildChartOptions(
+    labels: string[],
+    values: (number | null)[],
+    projection: NetWorthProjection | null,
+  ): ChartOptions {
+    const hasProjection = projection !== null && values.some(v => v !== null);
+
+    const allLabels = hasProjection ? [...labels, projection!.label] : labels;
+    const historicalValues = hasProjection ? [...values, null] : values;
+
+    const projectionValues: (number | null)[] = hasProjection
+      ? new Array(allLabels.length).fill(null)
+      : [];
+
+    if (hasProjection) {
+      let lastNonNullIdx = -1;
+      for (let i = values.length - 1; i >= 0; i--) {
+        if (values[i] !== null) { lastNonNullIdx = i; break; }
+      }
+      if (lastNonNullIdx !== -1) {
+        projectionValues[lastNonNullIdx] = values[lastNonNullIdx];
+        projectionValues[allLabels.length - 1] = projection!.amount;
+      }
+    }
+
+    const series: ApexAxisChartSeries = [
+      { name: 'Patrimonio', type: 'area', data: historicalValues as number[] },
+      ...(hasProjection ? [{ name: 'Proiezione', type: 'line', data: projectionValues as number[] }] : []),
+    ];
+
     return {
-      series: [{ name: 'Patrimonio', data: values as number[] }],
+      series,
       chart: {
-        type: 'area',
+        type: 'line',
         height: 320,
         toolbar: { show: false },
         zoom: { enabled: false },
@@ -274,14 +313,19 @@ export class HomeComponent implements OnInit {
           opacity: 0.15,
         },
       },
-      colors: ['#6366f1'],
-      stroke: { curve: 'smooth', width: 3, lineCap: 'round' },
+      colors: hasProjection ? ['#6366f1', '#a78bfa'] : ['#6366f1'],
+      stroke: {
+        curve: 'smooth',
+        width: hasProjection ? [3, 3] : [3],
+        lineCap: 'round',
+        dashArray: hasProjection ? [0, 4] : [0],
+      },
       dataLabels: { enabled: false },
       markers: {
-        size: 0,
-        colors: ['#6366f1'],
+        size: hasProjection ? [0, 5] : [0],
+        colors: hasProjection ? ['#6366f1', '#a78bfa'] : ['#6366f1'],
         strokeColors: '#ffffff',
-        strokeWidth: 3,
+        strokeWidth: 2,
         hover: { size: 7 },
       },
       fill: {
@@ -298,7 +342,7 @@ export class HomeComponent implements OnInit {
         },
       },
       xaxis: {
-        categories: labels,
+        categories: allLabels,
         labels: {
           style: { colors: '#9ca3af', fontSize: '12px', fontWeight: 500 },
         },
@@ -334,6 +378,19 @@ export class HomeComponent implements OnInit {
             val == null ? '—' : `€ ${val.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         },
         marker: { show: true },
+      },
+      legend: {
+        show: hasProjection,
+        position: 'top',
+        horizontalAlign: 'right',
+        fontSize: '12px',
+        fontFamily: 'inherit',
+        fontWeight: 500,
+        labels: { colors: '#6b7280' },
+        markers: { width: 8, height: 8, radius: 4, offsetX: -2 },
+        itemMargin: { horizontal: 12, vertical: 0 },
+        onItemClick: { toggleDataSeries: false },
+        onItemHover: { highlightDataSeries: false },
       },
     };
   }

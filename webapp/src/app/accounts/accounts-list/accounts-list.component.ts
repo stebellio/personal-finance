@@ -28,6 +28,10 @@ export class AccountsListComponent implements OnInit {
   saving = false;
   saveError: string | null = null;
 
+  deleteConfirmAccount: Account | null = null;
+  deleting = false;
+  deleteError: string | null = null;
+
   readonly accountTypes: { value: AccountType; label: string }[] = [
     { value: 'checking', label: 'Corrente' },
     { value: 'saving', label: 'Risparmio' },
@@ -68,6 +72,34 @@ export class AccountsListComponent implements OnInit {
   closeModal(): void {
     if (this.saving) return;
     this.isModalOpen = false;
+  }
+
+  openDeleteConfirm(account: Account): void {
+    this.deleteConfirmAccount = account;
+    this.deleteError = null;
+  }
+
+  closeDeleteConfirm(): void {
+    if (this.deleting) return;
+    this.deleteConfirmAccount = null;
+  }
+
+  confirmDelete(): void {
+    if (!this.deleteConfirmAccount) return;
+    this.deleting = true;
+    this.deleteError = null;
+    this.accountService
+      .deleteAccount(this.deleteConfirmAccount.id)
+      .pipe(finalize(() => (this.deleting = false)))
+      .subscribe({
+        next: () => {
+          this.deleteConfirmAccount = null;
+          this.loadAccounts();
+        },
+        error: () => {
+          this.deleteError = 'Impossibile eliminare il conto. Riprova più tardi.';
+        },
+      });
   }
 
   submitForm(): void {

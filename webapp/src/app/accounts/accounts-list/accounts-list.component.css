@@ -115,7 +115,8 @@
   align-items: flex-end;
   flex-shrink: 0;
 }
-.row__edit-btn {
+.row__edit-btn,
+.row__delete-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -129,7 +130,8 @@
   flex-shrink: 0;
   transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
-.row__edit-btn svg {
+.row__edit-btn svg,
+.row__delete-btn svg {
   width: 16px;
   height: 16px;
 }
@@ -137,6 +139,11 @@
   background: rgba(99, 102, 241, 0.08);
   color: #4f46e5;
   border-color: rgba(99, 102, 241, 0.25);
+}
+.row__delete-btn:hover {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.25);
 }
 .row__balance-label {
   font-size: 11px;
@@ -244,6 +251,23 @@
   gap: 12px;
   margin-bottom: 20px;
 }
+.modal__dialog--compact {
+  max-width: 400px;
+}
+.modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.modal__confirm-text {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+}
+.modal__confirm-text strong {
+  color: #1f2937;
+}
 .modal__eyebrow {
   margin: 0 0 4px;
   font-size: 11px;
@@ -251,6 +275,9 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #6366f1;
+}
+.modal__eyebrow--danger {
+  color: #dc2626;
 }
 .modal__title {
   margin: 0;
@@ -417,9 +444,30 @@
 .btn--ghost:hover:not(:disabled) {
   background: #f3f4f6;
 }
+.btn--danger {
+  color: #fff;
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+  gap: 6px;
+}
+.btn--danger:hover:not(:disabled) {
+  background: #bb1e1e;
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
+}
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+.spinner {
+  width: 16px;
+  height: 16px;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 @keyframes modalIn {
   from {

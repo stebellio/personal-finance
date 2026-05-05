@@ -23,4 +23,8 @@ export class AccountService {
   updateAccount(id: number, payload: { name: string; description?: string; type?: string }): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/accounts/${id}`, payload);
   }
+
+  deleteAccount(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/accounts/${id}`);
+  }
 }

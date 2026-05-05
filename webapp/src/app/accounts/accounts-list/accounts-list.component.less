@@ -5,6 +5,7 @@
 @border: #e5e7eb;
 @error: #ef4444;
 @error-bg: #fef2f2;
+@danger: #dc2626;
 
 :host {
   display: block;
@@ -133,7 +134,8 @@
     flex-shrink: 0;
   }
 
-  &__edit-btn {
+  &__edit-btn,
+  &__delete-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -148,12 +150,18 @@
     transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 
     svg { width: 16px; height: 16px; }
+  }
 
-    &:hover {
-      background: rgba(99, 102, 241, 0.08);
-      color: @primary-dark;
-      border-color: rgba(99, 102, 241, 0.25);
-    }
+  &__edit-btn:hover {
+    background: rgba(99, 102, 241, 0.08);
+    color: @primary-dark;
+    border-color: rgba(99, 102, 241, 0.25);
+  }
+
+  &__delete-btn:hover {
+    background: rgba(220, 38, 38, 0.08);
+    color: @danger;
+    border-color: rgba(220, 38, 38, 0.25);
   }
 
   &__balance-label {
@@ -266,6 +274,25 @@
     margin-bottom: 20px;
   }
 
+  &__dialog--compact {
+    max-width: 400px;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__confirm-text {
+    margin: 0;
+    font-size: 14px;
+    color: @text-muted;
+    line-height: 1.6;
+
+    strong { color: @text-dark; }
+  }
+
   &__eyebrow {
     margin: 0 0 4px;
     font-size: 11px;
@@ -273,6 +300,10 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: @primary;
+  }
+
+  &__eyebrow--danger {
+    color: @danger;
   }
 
   &__title {
@@ -443,7 +474,30 @@
     &:hover:not(:disabled) { background: #f3f4f6; }
   }
 
+  &--danger {
+    color: #fff;
+    background: @danger;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+    gap: 6px;
+
+    &:hover:not(:disabled) {
+      background: darken(@danger, 8%);
+      box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
+    }
+  }
+
   &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes modalIn {

@@ -44,6 +44,14 @@
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
+        <button type="button" class="row__delete-btn" (click)="openDeleteConfirm(account)" aria-label="Elimina conto">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </article>
     </ng-container>
   </div>
@@ -67,6 +75,46 @@
     </div>
   </ng-template>
 </section>
+
+<div class="modal" *ngIf="deleteConfirmAccount" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+  <div class="modal__backdrop" (click)="closeDeleteConfirm()"></div>
+  <div class="modal__dialog modal__dialog--compact">
+    <header class="modal__header">
+      <div>
+        <p class="modal__eyebrow modal__eyebrow--danger">Elimina conto</p>
+        <h2 id="deleteModalTitle" class="modal__title">{{ deleteConfirmAccount.name }}</h2>
+      </div>
+      <button type="button" class="modal__close" (click)="closeDeleteConfirm()" [disabled]="deleting" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </header>
+    <div class="modal__body">
+      <p class="modal__confirm-text">
+        Sei sicuro di voler eliminare il conto <strong>{{ deleteConfirmAccount.name }}</strong>?
+        Verranno eliminate anche tutte le chiusure associate. Questa azione è irreversibile.
+      </p>
+      <div class="modal__alert" *ngIf="deleteError" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M12 8v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="12" cy="16" r="1" fill="currentColor"/>
+        </svg>
+        <span>{{ deleteError }}</span>
+      </div>
+      <div class="modal__actions">
+        <button type="button" class="btn btn--ghost" (click)="closeDeleteConfirm()" [disabled]="deleting">Annulla</button>
+        <button type="button" class="btn btn--danger" (click)="confirmDelete()" [disabled]="deleting">
+          <svg *ngIf="deleting" class="spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="10"/>
+          </svg>
+          {{ deleting ? 'Eliminazione...' : 'Elimina conto' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="modal" *ngIf="isModalOpen" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
   <div class="modal__backdrop" (click)="closeModal()"></div>

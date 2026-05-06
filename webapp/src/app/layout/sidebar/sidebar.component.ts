@@ -8,6 +8,8 @@ interface NavItem {
   route: string;
 }
 
+const STORAGE_KEY = 'sidebar-collapsed';
+
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
@@ -20,6 +22,8 @@ export class SidebarComponent {
     { label: 'Chiusure', icon: 'closures', route: '/closures' },
   ];
 
+  collapsed = localStorage.getItem(STORAGE_KEY) === 'true';
+
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router,
@@ -31,6 +35,11 @@ export class SidebarComponent {
 
   get userInitial(): string {
     return (this.userEmail[0] ?? 'U').toUpperCase();
+  }
+
+  toggle(): void {
+    this.collapsed = !this.collapsed;
+    localStorage.setItem(STORAGE_KEY, String(this.collapsed));
   }
 
   logout(): void {

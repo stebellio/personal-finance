@@ -2,7 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
-  NotFoundException,
+  UnprocessableEntityException,
 } from "@nestjs/common";
 import { CLOSURE_REPOSITORY } from "../../closure/token";
 import type { IClosureRepository } from "../../closure/repositories/closureRepository.interface";
@@ -57,61 +57,27 @@ export class AnalyticService {
   async getNetWorthProjection(
     userId: number,
   ): Promise<{ month: number; year: number; amount: number }> {
-    const closurePeriods = this.buildEmptyClosurePeriod(Period.YEARLY);
-    const firstPeriod = closurePeriods[0];
-    const lastPeriod = closurePeriods[closurePeriods.length - 1];
+    const closurePeriods = await this.getNetWorthHistory(userId, Period.YEARLY);
 
-    const closures = await this.closureRepository.findByUserIdAndRange(
-      userId,
-      { year: firstPeriod.year, month: firstPeriod.month },
-      { year: lastPeriod.year, month: lastPeriod.month },
-    );
-
-    const periodMap = new Map(
-      closurePeriods.map((cp) => [`${cp.year}-${cp.month}`, cp]),
-    );
-
-    for (const closure of closures) {
-      const cp = periodMap.get(`${closure.year}-${closure.month}`);
-      if (cp) {
-        cp.amount = (cp.amount ?? 0) + closure.amount;
-      }
+    if (!closurePeriods || closurePeriods.length < 1) {
+      throw new UnprocessableEntityException("Invalid closure period.");
     }
 
-    const validPoints = closurePeriods
-      .map((cp, idx) => ({ idx, amount: cp.amount }))
-      .filter((p): p is { idx: number; amount: number } => p.amount !== null)
-      .map((p) => ({ x: p.idx, y: p.amount }));
+    const firstClosurePeriod = closurePeriods[0];
+    const lastClosurePeriod = closurePeriods[closurePeriods.length - 1];
+    const nextMonthDate = new Date();
+    nextMonthDate.setDate(nextMonthDate.getDate() + 1);
 
-    if (validPoints.length < 2) {
-      throw new NotFoundException("Not enough data for projection");
-    }
+    const avgAmount =
+      ((lastClosurePeriod.amount ?? 0) - (firstClosurePeriod.amount ?? 0)) /
+      closurePeriods.length;
+    const predictedAmount = (lastClosurePeriod.amount ?? 0) + avgAmount;
 
-    const { slope, intercept } = this.linearRegression(validPoints);
-    const projectedAmount = slope * closurePeriods.length + intercept;
-
-    const nextMonth =
-      lastPeriod.month === 12
-        ? { year: lastPeriod.year + 1, month: 1 }
-        : { year: lastPeriod.year, month: lastPeriod.month + 1 };
-
-    return { ...nextMonth, amount: projectedAmount };
-  }
-
-  private linearRegression(points: { x: number; y: number }[]): {
-    slope: number;
-    intercept: number;
-  } {
-    const n = points.length;
-    const sumX = points.reduce((s, p) => s + p.x, 0);
-    const sumY = points.reduce((s, p) => s + p.y, 0);
-    const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
-    const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
-    const denom = n * sumX2 - sumX * sumX;
-    if (denom === 0) return { slope: 0, intercept: sumY / n };
-    const slope = (n * sumXY - sumX * sumY) / denom;
-    const intercept = (sumY - slope * sumX) / n;
-    return { slope, intercept };
+    return {
+      month: nextMonthDate.getMonth() - 1,
+      year: nextMonthDate.getFullYear(),
+      amount: predictedAmount,
+    };
   }
 
   private buildEmptyClosurePeriod(period: Period): ClosurePeriod[] {

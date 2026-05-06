@@ -35,6 +35,7 @@ export class AccountsListComponent implements OnInit {
   readonly accountTypes: { value: AccountType; label: string }[] = [
     { value: 'checking', label: 'Corrente' },
     { value: 'saving', label: 'Risparmio' },
+    { value: 'investment', label: 'Investimento' },
     { value: 'debit', label: 'Debito' },
   ];
 

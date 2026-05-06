@@ -1,4 +1,4 @@
-export type AccountType = "checking" | "saving" | "debit";
+export type AccountType = "checking" | "saving" | "debit" | "investment";
 
 export class Account {
   id: number;

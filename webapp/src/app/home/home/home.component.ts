@@ -159,7 +159,7 @@ export class HomeComponent implements OnInit {
   }
 
   private groupByType(accounts: Account[]): { label: string; balance: number; isLiability?: boolean }[] {
-    const labels: Record<string, string> = { checking: 'Conto corrente', saving: 'Risparmio', debit: 'Debito' };
+    const labels: Record<string, string> = { checking: 'Conto corrente', saving: 'Risparmio', investment: 'Investimento', debit: 'Debito' };
     const assetMap = new Map<string, number>();
     let liabilityTotal = 0;
 

@@ -66,7 +66,7 @@ export class AnalyticService {
     const firstClosurePeriod = closurePeriods[0];
     const lastClosurePeriod = closurePeriods[closurePeriods.length - 1];
     const nextMonthDate = new Date();
-    nextMonthDate.setDate(nextMonthDate.getDate() + 1);
+    nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
 
     const avgAmount =
       ((lastClosurePeriod.amount ?? 0) - (firstClosurePeriod.amount ?? 0)) /
@@ -74,7 +74,7 @@ export class AnalyticService {
     const predictedAmount = (lastClosurePeriod.amount ?? 0) + avgAmount;
 
     return {
-      month: nextMonthDate.getMonth() - 1,
+      month: nextMonthDate.getMonth(),
       year: nextMonthDate.getFullYear(),
       amount: predictedAmount,
     };

@@ -20,6 +20,7 @@ export class SidebarComponent {
     { label: 'Dashboard', icon: 'dashboard', route: '/home' },
     { label: 'Conti', icon: 'wallet', route: '/accounts' },
     { label: 'Chiusure', icon: 'closures', route: '/closures' },
+    { label: 'Obiettivi', icon: 'target', route: '/goals' },
   ];
 
   collapsed = localStorage.getItem(STORAGE_KEY) === 'true';

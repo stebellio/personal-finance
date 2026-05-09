@@ -28,6 +28,11 @@ const routes: Routes = [
         loadChildren: () =>
           import('./closures/closures.module').then(m => m.ClosuresModule),
       },
+      {
+        path: 'goals',
+        loadChildren: () =>
+          import('./goals/goals.module').then(m => m.GoalsModule),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

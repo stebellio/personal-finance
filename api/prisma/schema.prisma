@@ -33,6 +33,7 @@ model Account {
   userId      Int
   user        User      @relation(fields: [userId], references: [id])
   closures    Closure[]
+  goals       Goal[]
 }
 
 model Closure {
@@ -46,4 +47,16 @@ model Closure {
   account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@unique([accountId, year, month])
+}
+
+model Goal {
+  id           Int       @id @default(autoincrement())
+  accountId    Int
+  name         String
+  targetAmount Float
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  completedAt  DateTime?
+
+  account Account @relation(fields: [accountId], references: [id])
 }

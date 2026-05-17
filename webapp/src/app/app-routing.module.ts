@@ -33,6 +33,11 @@ const routes: Routes = [
         loadChildren: () =>
           import('./goals/goals.module').then(m => m.GoalsModule),
       },
+      {
+        path: 'properties',
+        loadChildren: () =>
+          import('./properties/properties.module').then(m => m.PropertiesModule),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

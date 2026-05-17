@@ -8,6 +8,7 @@ import { ClosureModule } from "./closure/closure.module";
 import { ConfigModule } from "@nestjs/config";
 import { AnalyticModule } from './analytic/analytic.module';
 import { GoalModule } from './goal/goal.module';
+import { PropertyModule } from './property/property.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { GoalModule } from './goal/goal.module';
     ClosureModule,
     AnalyticModule,
     GoalModule,
+    PropertyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

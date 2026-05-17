@@ -11,6 +11,12 @@ import { Period } from "../../core/enum/period.enum";
 import { AnalyticService } from "../../core/services/analytic.service";
 import { NetWorthPoint } from "../../core/models/netWorthPoint.model";
 import { NetWorthProjection } from "../../core/models/netWorthProjection.model";
+import { PropertyService } from '../../core/services/property.service';
+import { PropertySummary } from '../../core/models/property.model';
+
+export type DashboardMode = 'financial' | 'real-estate' | 'both';
+const DASHBOARD_MODE_KEY = 'dashboard-mode';
+const VALID_MODES: DashboardMode[] = ['financial', 'real-estate', 'both'];
 
 export interface AllocationItem {
   name: string;
@@ -74,15 +80,31 @@ export class HomeComponent implements OnInit {
   donutChartOptions: DonutChartOptions = this.buildDonutOptions([]);
   donutTypeChartOptions: DonutChartOptions = this.buildDonutOptions([]);
 
+  readonly modes: { label: string; value: DashboardMode }[] = [
+    { label: 'Finanziario', value: 'financial' },
+    { label: 'Immobiliare', value: 'real-estate' },
+    { label: 'Entrambi', value: 'both' },
+  ];
+
+  selectedMode: DashboardMode = (() => {
+    const stored = localStorage.getItem(DASHBOARD_MODE_KEY) as DashboardMode;
+    return VALID_MODES.includes(stored) ? stored : 'financial';
+  })();
+
+  propertySummary: PropertySummary | null = null;
+  realEstateDonutOptions: DonutChartOptions = this.buildDonutOptions([]);
+
   constructor(
       private readonly authService: AuthService,
       private readonly accountService: AccountService,
       private readonly analyticsService: AnalyticService,
+      private readonly propertyService: PropertyService,
   ) {}
 
   ngOnInit(): void {
     this.loadAccounts();
     this.loadNetWorthHistory();
+    this.loadPropertySummary();
   }
 
   get userName(): string {
@@ -121,6 +143,32 @@ export class HomeComponent implements OnInit {
 
   get isPositiveTrend(): boolean {
     return (this.netWorthDelta ?? 0) >= 0;
+  }
+
+  get showFinancial(): boolean {
+    return this.selectedMode !== 'real-estate';
+  }
+
+  get showRealEstate(): boolean {
+    return this.selectedMode !== 'financial';
+  }
+
+  get realEstateTotal(): number {
+    return this.propertySummary?.total ?? 0;
+  }
+
+  get combinedNetWorth(): number {
+    return (this.currentNetWorth ?? 0) + this.realEstateTotal;
+  }
+
+  get realEstateAllocationItems(): AllocationItem[] {
+    if (!this.propertySummary) return [];
+    const items = this.propertySummary.byType.map(bt => ({
+      label: bt.type === 'building' ? 'Immobili' : 'Terreni',
+      balance: bt.total,
+      isLiability: false,
+    }));
+    return this.toAllocationItems(items);
   }
 
   get hasAllocationData(): boolean {
@@ -184,14 +232,16 @@ export class HomeComponent implements OnInit {
     return result;
   }
 
-  trackById(_: number, account: Account): number {
-    return account.id;
-  }
-
   onPeriodChange(period: Period): void {
     if (this.selectedPeriod === period) return;
     this.selectedPeriod = period;
     this.loadNetWorthHistory();
+  }
+
+  onModeChange(mode: DashboardMode): void {
+    if (this.selectedMode === mode) return;
+    this.selectedMode = mode;
+    localStorage.setItem(DASHBOARD_MODE_KEY, mode);
   }
 
   private loadAccounts(): void {
@@ -208,6 +258,15 @@ export class HomeComponent implements OnInit {
       this.accounts = accounts;
       this.donutChartOptions = this.buildDonutOptions(this.allocationItems);
       this.donutTypeChartOptions = this.buildDonutOptions(this.allocationTypeItems);
+    });
+  }
+
+  private loadPropertySummary(): void {
+    this.propertyService.getSummary().pipe(
+      catchError(() => of<PropertySummary>({ total: 0, count: 0, byType: [] }))
+    ).subscribe(summary => {
+      this.propertySummary = summary;
+      this.realEstateDonutOptions = this.buildDonutOptions(this.realEstateAllocationItems);
     });
   }
 

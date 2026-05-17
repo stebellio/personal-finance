@@ -8,6 +8,11 @@ interface NavItem {
   route: string;
 }
 
+interface NavGroup {
+  label?: string;
+  items: NavItem[];
+}
+
 const STORAGE_KEY = 'sidebar-collapsed';
 
 @Component({
@@ -16,11 +21,22 @@ const STORAGE_KEY = 'sidebar-collapsed';
   styleUrls: ['./sidebar.component.less'],
 })
 export class SidebarComponent {
-  readonly items: NavItem[] = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/home' },
-    { label: 'Conti', icon: 'wallet', route: '/accounts' },
-    { label: 'Chiusure', icon: 'closures', route: '/closures' },
-    { label: 'Obiettivi', icon: 'target', route: '/goals' },
+  readonly groups: NavGroup[] = [
+    {
+      items: [{ label: 'Dashboard', icon: 'dashboard', route: '/home' }],
+    },
+    {
+      label: 'Finanziario',
+      items: [
+        { label: 'Conti', icon: 'wallet', route: '/accounts' },
+        { label: 'Chiusure', icon: 'closures', route: '/closures' },
+        { label: 'Obiettivi', icon: 'target', route: '/goals' },
+      ],
+    },
+    {
+      label: 'Immobiliare',
+      items: [{ label: 'Proprietà', icon: 'building', route: '/properties' }],
+    },
   ];
 
   collapsed = localStorage.getItem(STORAGE_KEY) === 'true';

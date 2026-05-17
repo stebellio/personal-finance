@@ -77,6 +77,19 @@
   gap: 4px;
   flex: 1;
 }
+.sidebar__nav-section {
+  margin: 12px 0 4px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+.sidebar__nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 0;
+}
 .sidebar__nav-item {
   display: flex;
   align-items: center;

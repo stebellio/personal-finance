@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -6,7 +7,12 @@ import {
 } from "@nestjs/common";
 import { PROPERTY_REPOSITORY } from "../token";
 import type { IPropertyRepository } from "../repositories/propertyRepository.interface";
-import { Property, PropertyType } from "../models/property.model";
+import {
+  Property,
+  PropertyCategory,
+  PropertyState,
+  PropertyType,
+} from "../models/property.model";
 
 export interface PropertySummary {
   total: number;
@@ -24,10 +30,13 @@ export class PropertyService {
   async createProperty(data: {
     name: string;
     type?: PropertyType;
+    category?: PropertyCategory;
+    state?: PropertyState;
     address?: string;
     surface?: number;
-    purchasePrice?: number;
-    purchaseDate?: Date;
+    cadastralSheet?: string;
+    cadastralParcel?: string;
+    cadastralSubaltern?: string;
     currentValue?: number;
     currency?: string;
     description?: string;
@@ -40,13 +49,23 @@ export class PropertyService {
     if (existing) {
       throw new ConflictException("Property already exists with this name");
     }
+    const type = data.type ?? "building";
+    if (type === "building" && !data.category) {
+      throw new BadRequestException(
+        "La categoria è obbligatoria per gli immobili",
+      );
+    }
+    const isLand = type === "land";
     return this.propertyRepository.create({
       name: data.name,
-      type: data.type ?? "building",
+      type,
+      category: isLand ? undefined : data.category,
+      state: data.state,
       address: data.address,
       surface: data.surface,
-      purchasePrice: data.purchasePrice,
-      purchaseDate: data.purchaseDate,
+      cadastralSheet: data.cadastralSheet,
+      cadastralParcel: data.cadastralParcel,
+      cadastralSubaltern: isLand ? undefined : data.cadastralSubaltern,
       currentValue: data.currentValue ?? 0,
       currency: data.currency ?? "EUR",
       description: data.description,
@@ -91,10 +110,13 @@ export class PropertyService {
     data: {
       name?: string;
       type?: PropertyType;
+      category?: PropertyCategory;
+      state?: PropertyState;
       address?: string;
       surface?: number;
-      purchasePrice?: number;
-      purchaseDate?: Date;
+      cadastralSheet?: string;
+      cadastralParcel?: string;
+      cadastralSubaltern?: string;
       currentValue?: number;
       currency?: string;
       description?: string;
@@ -112,7 +134,21 @@ export class PropertyService {
       }
     }
 
-    await this.propertyRepository.update(id, data);
+    const resultingType = data.type ?? property.type;
+    const resultingCategory =
+      data.category !== undefined ? data.category : property.category;
+    if (resultingType === "building" && !resultingCategory) {
+      throw new BadRequestException(
+        "La categoria è obbligatoria per gli immobili",
+      );
+    }
+
+    await this.propertyRepository.update(id, {
+      ...data,
+      ...(resultingType === "land"
+        ? { category: null, cadastralSubaltern: null }
+        : {}),
+    });
   }
 
   async removeProperty(id: number, userId: number): Promise<void> {

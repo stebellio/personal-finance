@@ -43,7 +43,11 @@
         <div class="row__info">
           <h3>{{ prop.name }}</h3>
           <p *ngIf="prop.address">{{ prop.address }}</p>
-          <p *ngIf="!prop.address" class="row__type-badge">{{ prop.type === 'building' ? 'Immobile' : 'Terreno' }}</p>
+          <p class="row__badges">
+            <span class="row__type-badge">{{ prop.type === 'building' ? 'Immobile' : 'Terreno' }}</span>
+            <span class="row__type-badge" *ngIf="categoryLabel(prop.category)">{{ categoryLabel(prop.category) }}</span>
+            <span class="row__type-badge" *ngIf="stateLabel(prop.state)">{{ stateLabel(prop.state) }}</span>
+          </p>
         </div>
         <div class="row__value">
           <span class="row__value-label">Valore attuale</span>
@@ -205,26 +209,63 @@
       </div>
 
       <div class="form-row">
+        <div class="form-field" *ngIf="formData.type === 'building'">
+          <label for="property-category">Categoria</label>
+          <select
+            id="property-category"
+            name="category"
+            [(ngModel)]="formData.category"
+            required
+          >
+            <option value="" disabled>Seleziona una categoria</option>
+            <option *ngFor="let c of propertyCategories" [value]="c.value">{{ c.label }}</option>
+          </select>
+        </div>
         <div class="form-field">
-          <label for="property-purchase-price">Prezzo d'acquisto <span class="form-field__optional">(opz.)</span></label>
+          <label for="property-state">Stato <span class="form-field__optional">(opz.)</span></label>
+          <select
+            id="property-state"
+            name="state"
+            [(ngModel)]="formData.state"
+          >
+            <option value="">Non specificato</option>
+            <option *ngFor="let s of propertyStates" [value]="s.value">{{ s.label }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="property-cadastral-sheet">Foglio <span class="form-field__optional">(opz.)</span></label>
           <input
-            id="property-purchase-price"
-            type="number"
-            name="purchasePrice"
-            [(ngModel)]="formData.purchasePrice"
-            placeholder="Es. 200000"
+            id="property-cadastral-sheet"
+            type="text"
+            name="cadastralSheet"
+            [(ngModel)]="formData.cadastralSheet"
+            placeholder="Es. 12"
             autocomplete="off"
-            min="0"
-            step="any"
           />
         </div>
         <div class="form-field">
-          <label for="property-purchase-date">Data d'acquisto <span class="form-field__optional">(opz.)</span></label>
+          <label for="property-cadastral-parcel">Particella <span class="form-field__optional">(opz.)</span></label>
           <input
-            id="property-purchase-date"
-            type="date"
-            name="purchaseDate"
-            [(ngModel)]="formData.purchaseDate"
+            id="property-cadastral-parcel"
+            type="text"
+            name="cadastralParcel"
+            [(ngModel)]="formData.cadastralParcel"
+            placeholder="Es. 345"
+            autocomplete="off"
+          />
+        </div>
+        <div class="form-field" *ngIf="formData.type === 'building'">
+          <label for="property-cadastral-subaltern">Subalterno <span class="form-field__optional">(opz.)</span></label>
+          <input
+            id="property-cadastral-subaltern"
+            type="text"
+            name="cadastralSubaltern"
+            [(ngModel)]="formData.cadastralSubaltern"
+            placeholder="Es. 7"
+            autocomplete="off"
           />
         </div>
       </div>

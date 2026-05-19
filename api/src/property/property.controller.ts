@@ -14,7 +14,11 @@ import { PropertyPresenter } from "./presenters/property.presenter";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { CurrentUser } from "../auth/currentUser.decorator";
 import type { AuthUser } from "../auth/models/authUser.model";
-import type { PropertyType } from "./models/property.model";
+import type {
+  PropertyCategory,
+  PropertyState,
+  PropertyType,
+} from "./models/property.model";
 
 @Controller("properties")
 @UseGuards(JwtAuthGuard)
@@ -28,10 +32,13 @@ export class PropertyController {
     body: {
       name: string;
       type?: PropertyType;
+      category?: PropertyCategory;
+      state?: PropertyState;
       address?: string;
       surface?: number;
-      purchasePrice?: number;
-      purchaseDate?: string;
+      cadastralSheet?: string;
+      cadastralParcel?: string;
+      cadastralSubaltern?: string;
       currentValue?: number;
       currency?: string;
       description?: string;
@@ -39,7 +46,6 @@ export class PropertyController {
   ): Promise<number> {
     return this.propertyService.createProperty({
       ...body,
-      purchaseDate: body.purchaseDate ? new Date(body.purchaseDate) : undefined,
       userId: user.id,
     });
   }
@@ -76,19 +82,19 @@ export class PropertyController {
     body: {
       name?: string;
       type?: PropertyType;
+      category?: PropertyCategory;
+      state?: PropertyState;
       address?: string;
       surface?: number;
-      purchasePrice?: number;
-      purchaseDate?: string;
+      cadastralSheet?: string;
+      cadastralParcel?: string;
+      cadastralSubaltern?: string;
       currentValue?: number;
       currency?: string;
       description?: string;
     },
   ): Promise<void> {
-    return this.propertyService.updateProperty(id, user.id, {
-      ...body,
-      purchaseDate: body.purchaseDate ? new Date(body.purchaseDate) : undefined,
-    });
+    return this.propertyService.updateProperty(id, user.id, body);
   }
 
   @Delete("/:id")

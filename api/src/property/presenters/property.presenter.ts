@@ -1,13 +1,21 @@
-import { Property, PropertyType } from "../models/property.model";
+import {
+  Property,
+  PropertyCategory,
+  PropertyState,
+  PropertyType,
+} from "../models/property.model";
 
 export class PropertyPresenter {
   id: number;
   name: string;
   type: PropertyType;
+  category?: PropertyCategory;
+  state?: PropertyState;
   address?: string;
   surface?: number;
-  purchasePrice?: number;
-  purchaseDate?: string;
+  cadastralSheet?: string;
+  cadastralParcel?: string;
+  cadastralSubaltern?: string;
   currentValue: number;
   currency: string;
   description?: string;
@@ -18,10 +26,13 @@ export class PropertyPresenter {
     this.id = property.id;
     this.name = property.name;
     this.type = property.type;
+    this.category = property.category;
+    this.state = property.state;
     this.address = property.address;
     this.surface = property.surface;
-    this.purchasePrice = property.purchasePrice;
-    this.purchaseDate = property.purchaseDate?.toISOString();
+    this.cadastralSheet = property.cadastralSheet;
+    this.cadastralParcel = property.cadastralParcel;
+    this.cadastralSubaltern = property.cadastralSubaltern;
     this.currentValue = property.currentValue;
     this.currency = property.currency;
     this.description = property.description;

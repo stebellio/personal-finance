@@ -3,15 +3,22 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Property, PropertySummary } from '../models/property.model';
-import { PropertyType } from '../models/property.model';
+import {
+  PropertyCategory,
+  PropertyState,
+  PropertyType,
+} from '../models/property.model';
 
 export interface CreatePropertyPayload {
   name: string;
   type?: PropertyType;
+  category?: PropertyCategory;
+  state?: PropertyState;
   address?: string;
   surface?: number;
-  purchasePrice?: number;
-  purchaseDate?: string;
+  cadastralSheet?: string;
+  cadastralParcel?: string;
+  cadastralSubaltern?: string;
   currentValue?: number;
   currency?: string;
   description?: string;
@@ -20,10 +27,13 @@ export interface CreatePropertyPayload {
 export interface UpdatePropertyPayload {
   name?: string;
   type?: PropertyType;
+  category?: PropertyCategory;
+  state?: PropertyState;
   address?: string;
   surface?: number;
-  purchasePrice?: number;
-  purchaseDate?: string;
+  cadastralSheet?: string;
+  cadastralParcel?: string;
+  cadastralSubaltern?: string;
   currentValue?: number;
   currency?: string;
   description?: string;

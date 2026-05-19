@@ -63,20 +63,23 @@ model Goal {
 }
 
 model Property {
-  id            Int       @id @default(autoincrement())
-  name          String
-  type          String    @default("building")
-  address       String?
-  surface       Float?
-  purchasePrice Float?
-  purchaseDate  DateTime?
-  currentValue  Float     @default(0)
-  currency      String    @default("EUR")
-  description   String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  userId        Int
-  user          User      @relation(fields: [userId], references: [id])
+  id                 Int      @id @default(autoincrement())
+  name               String
+  type               String   @default("building")
+  category           String?
+  state              String?
+  address            String?
+  surface            Float?
+  cadastralSheet     String?
+  cadastralParcel    String?
+  cadastralSubaltern String?
+  currentValue       Float    @default(0)
+  currency           String   @default("EUR")
+  description        String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  userId             Int
+  user               User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, name])
 }

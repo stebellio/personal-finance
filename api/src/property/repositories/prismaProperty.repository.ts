@@ -1,7 +1,12 @@
 import { IPropertyRepository } from "./propertyRepository.interface";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Injectable } from "@nestjs/common";
-import { Property, PropertyType } from "../models/property.model";
+import {
+  Property,
+  PropertyCategory,
+  PropertyState,
+  PropertyType,
+} from "../models/property.model";
 import { Property as PrismaProperty } from "generated/prisma";
 import { IPrismaRepository } from "../../prisma/prismaRepository.interface";
 
@@ -14,10 +19,13 @@ export class PrismaPropertyRepository
   async create(data: {
     name: string;
     type: PropertyType;
+    category?: PropertyCategory;
+    state?: PropertyState;
     address?: string;
     surface?: number;
-    purchasePrice?: number;
-    purchaseDate?: Date;
+    cadastralSheet?: string;
+    cadastralParcel?: string;
+    cadastralSubaltern?: string;
     currentValue: number;
     currency: string;
     description?: string;
@@ -55,10 +63,13 @@ export class PrismaPropertyRepository
     data: {
       name?: string;
       type?: PropertyType;
+      category?: PropertyCategory | null;
+      state?: PropertyState;
       address?: string;
       surface?: number;
-      purchasePrice?: number;
-      purchaseDate?: Date;
+      cadastralSheet?: string;
+      cadastralParcel?: string;
+      cadastralSubaltern?: string | null;
       currentValue?: number;
       currency?: string;
       description?: string;
@@ -83,9 +94,12 @@ export class PrismaPropertyRepository
       prismaModel.userId,
       prismaModel.address ?? undefined,
       prismaModel.surface ?? undefined,
-      prismaModel.purchasePrice ?? undefined,
-      prismaModel.purchaseDate ?? undefined,
       prismaModel.description ?? undefined,
+      (prismaModel.category as PropertyCategory | null) ?? undefined,
+      (prismaModel.state as PropertyState | null) ?? undefined,
+      prismaModel.cadastralSheet ?? undefined,
+      prismaModel.cadastralParcel ?? undefined,
+      prismaModel.cadastralSubaltern ?? undefined,
     );
   }
 }

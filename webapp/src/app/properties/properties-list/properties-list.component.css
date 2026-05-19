@@ -109,6 +109,12 @@
   font-size: 13px;
   color: #6b7280;
 }
+.row__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px !important;
+}
 .row__type-badge {
   display: inline-block;
   font-size: 11px;

@@ -2,7 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { PropertyService } from '../../core/services/property.service';
-import { Property, PropertyType } from '../../core/models/property.model';
+import {
+  Property,
+  PropertyCategory,
+  PropertyState,
+  PropertyType,
+} from '../../core/models/property.model';
 
 @Component({
   selector: 'app-properties-list',
@@ -21,10 +26,13 @@ export class PropertiesListComponent implements OnInit {
   formData: {
     name: string;
     type: PropertyType;
+    category: PropertyCategory | '';
+    state: PropertyState | '';
     currentValue: number;
-    purchasePrice: number | null;
-    purchaseDate: string;
     surface: number | null;
+    cadastralSheet: string;
+    cadastralParcel: string;
+    cadastralSubaltern: string;
     address: string;
     description: string;
   } = this.emptyForm();
@@ -41,6 +49,22 @@ export class PropertiesListComponent implements OnInit {
     { value: 'land', label: 'Terreno' },
   ];
 
+  readonly propertyCategories: { value: PropertyCategory; label: string }[] = [
+    { value: 'apartment', label: 'Appartamento' },
+    { value: 'garage', label: 'Garage' },
+    { value: 'office', label: 'Ufficio' },
+    { value: 'commercial', label: 'Locale commerciale' },
+    { value: 'villa', label: 'Villetta' },
+    { value: 'rural_house', label: 'Casa rurale' },
+    { value: 'storage', label: 'Deposito' },
+  ];
+
+  readonly propertyStates: { value: PropertyState; label: string }[] = [
+    { value: 'free', label: 'Libero' },
+    { value: 'family_use', label: 'Uso familiare' },
+    { value: 'rented', label: 'Locato' },
+  ];
+
   constructor(private readonly propertyService: PropertyService) {}
 
   ngOnInit(): void {
@@ -49,6 +73,14 @@ export class PropertiesListComponent implements OnInit {
 
   trackById(_: number, property: Property): number {
     return property.id;
+  }
+
+  categoryLabel(value?: PropertyCategory): string | null {
+    return this.propertyCategories.find(c => c.value === value)?.label ?? null;
+  }
+
+  stateLabel(value?: PropertyState): string | null {
+    return this.propertyStates.find(s => s.value === value)?.label ?? null;
   }
 
   openCreateModal(): void {
@@ -63,10 +95,13 @@ export class PropertiesListComponent implements OnInit {
     this.formData = {
       name: property.name,
       type: property.type,
+      category: property.category ?? '',
+      state: property.state ?? '',
       currentValue: property.currentValue,
-      purchasePrice: property.purchasePrice ?? null,
-      purchaseDate: property.purchaseDate ? property.purchaseDate.slice(0, 10) : '',
       surface: property.surface ?? null,
+      cadastralSheet: property.cadastralSheet ?? '',
+      cadastralParcel: property.cadastralParcel ?? '',
+      cadastralSubaltern: property.cadastralSubaltern ?? '',
       address: property.address ?? '',
       description: property.description ?? '',
     };
@@ -120,6 +155,10 @@ export class PropertiesListComponent implements OnInit {
       this.saveError = 'Il valore attuale deve essere maggiore di zero.';
       return;
     }
+    if (this.formData.type === 'building' && !this.formData.category) {
+      this.saveError = 'La categoria è obbligatoria per gli immobili.';
+      return;
+    }
     if (this.modalMode === 'create') {
       this.submitCreate(name);
     } else {
@@ -127,20 +166,30 @@ export class PropertiesListComponent implements OnInit {
     }
   }
 
+  private buildPayload(name: string) {
+    const isLand = this.formData.type === 'land';
+    return {
+      name,
+      type: this.formData.type,
+      category: isLand ? undefined : this.formData.category || undefined,
+      state: this.formData.state || undefined,
+      currentValue: this.formData.currentValue,
+      surface: this.formData.surface ?? undefined,
+      cadastralSheet: this.formData.cadastralSheet.trim() || undefined,
+      cadastralParcel: this.formData.cadastralParcel.trim() || undefined,
+      cadastralSubaltern: isLand
+        ? undefined
+        : this.formData.cadastralSubaltern.trim() || undefined,
+      address: this.formData.address.trim() || undefined,
+      description: this.formData.description.trim() || undefined,
+    };
+  }
+
   private submitCreate(name: string): void {
     this.saving = true;
     this.saveError = null;
     this.propertyService
-      .createProperty({
-        name,
-        type: this.formData.type,
-        currentValue: this.formData.currentValue,
-        purchasePrice: this.formData.purchasePrice ?? undefined,
-        purchaseDate: this.formData.purchaseDate || undefined,
-        surface: this.formData.surface ?? undefined,
-        address: this.formData.address.trim() || undefined,
-        description: this.formData.description.trim() || undefined,
-      })
+      .createProperty(this.buildPayload(name))
       .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {
@@ -157,16 +206,7 @@ export class PropertiesListComponent implements OnInit {
     this.saving = true;
     this.saveError = null;
     this.propertyService
-      .updateProperty(this.editingPropertyId!, {
-        name,
-        type: this.formData.type,
-        currentValue: this.formData.currentValue,
-        purchasePrice: this.formData.purchasePrice ?? undefined,
-        purchaseDate: this.formData.purchaseDate || undefined,
-        surface: this.formData.surface ?? undefined,
-        address: this.formData.address.trim() || undefined,
-        description: this.formData.description.trim() || undefined,
-      })
+      .updateProperty(this.editingPropertyId!, this.buildPayload(name))
       .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {
@@ -198,10 +238,13 @@ export class PropertiesListComponent implements OnInit {
     return {
       name: '',
       type: 'building' as PropertyType,
+      category: '' as PropertyCategory | '',
+      state: '' as PropertyState | '',
       currentValue: 0,
-      purchasePrice: null as number | null,
-      purchaseDate: '',
       surface: null as number | null,
+      cadastralSheet: '',
+      cadastralParcel: '',
+      cadastralSubaltern: '',
       address: '',
       description: '',
     };

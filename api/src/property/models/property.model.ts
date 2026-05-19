@@ -1,13 +1,27 @@
 export type PropertyType = "building" | "land";
 
+export type PropertyCategory =
+  | "apartment"
+  | "garage"
+  | "office"
+  | "commercial"
+  | "villa"
+  | "rural_house"
+  | "storage";
+
+export type PropertyState = "free" | "family_use" | "rented";
+
 export class Property {
   id: number;
   name: string;
   type: PropertyType;
+  category?: PropertyCategory;
+  state?: PropertyState;
   address?: string;
   surface?: number;
-  purchasePrice?: number;
-  purchaseDate?: Date;
+  cadastralSheet?: string;
+  cadastralParcel?: string;
+  cadastralSubaltern?: string;
   currentValue: number;
   currency: string;
   description?: string;
@@ -26,9 +40,12 @@ export class Property {
     userId: number,
     address?: string,
     surface?: number,
-    purchasePrice?: number,
-    purchaseDate?: Date,
     description?: string,
+    category?: PropertyCategory,
+    state?: PropertyState,
+    cadastralSheet?: string,
+    cadastralParcel?: string,
+    cadastralSubaltern?: string,
   ) {
     this.id = id;
     this.name = name;
@@ -40,8 +57,11 @@ export class Property {
     this.userId = userId;
     this.address = address;
     this.surface = surface;
-    this.purchasePrice = purchasePrice;
-    this.purchaseDate = purchaseDate;
     this.description = description;
+    this.category = category;
+    this.state = state;
+    this.cadastralSheet = cadastralSheet;
+    this.cadastralParcel = cadastralParcel;
+    this.cadastralSubaltern = cadastralSubaltern;
   }
 }

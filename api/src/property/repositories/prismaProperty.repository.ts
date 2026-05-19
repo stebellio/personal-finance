@@ -35,7 +35,10 @@ export class PrismaPropertyRepository
     return model.id;
   }
 
-  async findByIdAndUserId(id: number, userId: number): Promise<Property | null> {
+  async findByIdAndUserId(
+    id: number,
+    userId: number,
+  ): Promise<Property | null> {
     const model = await this.prismaService.property.findFirst({
       where: { id, userId },
     });
@@ -50,7 +53,10 @@ export class PrismaPropertyRepository
     return models.map((m) => this.prismaModelToDomainModel(m));
   }
 
-  async findByUserIdAndName(userId: number, name: string): Promise<Property | null> {
+  async findByUserIdAndName(
+    userId: number,
+    name: string,
+  ): Promise<Property | null> {
     const model = await this.prismaService.property.findFirst({
       where: { userId, name },
     });

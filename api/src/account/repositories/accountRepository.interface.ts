@@ -20,5 +20,8 @@ export interface IAccountRepository {
 
   updateBalance(id: number, balance: number): Promise<void>;
 
-  update(id: number, data: { name?: string; description?: string; type?: AccountType }): Promise<void>;
+  update(
+    id: number,
+    data: { name?: string; description?: string; type?: AccountType },
+  ): Promise<void>;
 }

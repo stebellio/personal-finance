@@ -64,7 +64,10 @@ export class AccountService {
     const account = await this.getAccount(id, userId);
 
     if (data.name && data.name !== account.name) {
-      const existing = await this.accountRepository.findByUserIdAndName(userId, data.name);
+      const existing = await this.accountRepository.findByUserIdAndName(
+        userId,
+        data.name,
+      );
       if (existing) {
         throw new ConflictException("Account already exists with this name");
       }

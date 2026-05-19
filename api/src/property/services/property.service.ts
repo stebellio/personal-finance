@@ -55,7 +55,10 @@ export class PropertyService {
   }
 
   async getProperty(id: number, userId: number): Promise<Property> {
-    const property = await this.propertyRepository.findByIdAndUserId(id, userId);
+    const property = await this.propertyRepository.findByIdAndUserId(
+      id,
+      userId,
+    );
     if (!property) throw new NotFoundException();
     return property;
   }

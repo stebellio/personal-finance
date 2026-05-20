@@ -5,6 +5,11 @@ export interface IAuthRepository {
     password: string;
   } | null>;
 
+  findById(id: number): Promise<{
+    id: number;
+    email: string;
+  } | null>;
+
   create(data: {
     email: string;
     password: string;

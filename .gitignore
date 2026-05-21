@@ -11,3 +11,6 @@
 /webapp/dist/
 /CLAUDE.md
 /.claude/
+
+.DS_Store
+**/.DS_Store

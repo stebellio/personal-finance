@@ -19,7 +19,11 @@ describe("Auth - AuthService", () => {
     mockJwtService = mock<JwtService>();
     mockConfigService = mock<ConfigService>();
 
-    service = new AuthService(mockRepository, mockJwtService, mockConfigService);
+    service = new AuthService(
+      mockRepository,
+      mockJwtService,
+      mockConfigService,
+    );
   });
 
   describe("validateUser", () => {
@@ -87,7 +91,10 @@ describe("Auth - AuthService", () => {
         id: 1,
         email: "user@test.com",
       } as never);
-      mockRepository.findById.mockResolvedValue({ id: 1, email: "user@test.com" });
+      mockRepository.findById.mockResolvedValue({
+        id: 1,
+        email: "user@test.com",
+      });
       mockJwtService.sign
         .mockReturnValueOnce("new-access-token")
         .mockReturnValueOnce("new-refresh-token");

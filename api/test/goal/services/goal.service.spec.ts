@@ -45,7 +45,12 @@ describe("Goal - GoalService", () => {
   });
 
   describe("createGoal", () => {
-    const baseInput = { accountId, userId, name: "Emergency Fund", target: 10000 };
+    const baseInput = {
+      accountId,
+      userId,
+      name: "Emergency Fund",
+      target: 10000,
+    };
 
     it("should throw BadRequestException for NaN target", async () => {
       await expect(
@@ -109,7 +114,9 @@ describe("Goal - GoalService", () => {
     it("should throw NotFoundException if goal is not found", async () => {
       mockGoalRepository.findByIdAndUserId.mockResolvedValue(null);
 
-      await expect(service.getGoal(1, userId)).rejects.toThrow(NotFoundException);
+      await expect(service.getGoal(1, userId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it("should return the goal when found", async () => {
@@ -151,7 +158,9 @@ describe("Goal - GoalService", () => {
       const result = await service.getGoalsByAccount(accountId, userId);
 
       expect(result).toBe(goals);
-      expect(mockGoalRepository.findByAccountId).toHaveBeenCalledWith(accountId);
+      expect(mockGoalRepository.findByAccountId).toHaveBeenCalledWith(
+        accountId,
+      );
     });
   });
 
@@ -175,7 +184,9 @@ describe("Goal - GoalService", () => {
     it("should throw ConflictException if new name already exists in the account", async () => {
       const goal = makeGoal({ name: "Old Name" });
       mockGoalRepository.findByIdAndUserId.mockResolvedValue(goal);
-      mockGoalRepository.findByAccountIdAndName.mockResolvedValue(makeGoal({ name: "New Name" }));
+      mockGoalRepository.findByAccountIdAndName.mockResolvedValue(
+        makeGoal({ name: "New Name" }),
+      );
 
       await expect(
         service.updateGoal(1, userId, { name: "New Name" }),

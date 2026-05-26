@@ -62,7 +62,11 @@ describe("Property - PropertyService", () => {
       mockPropertyRepository.findByUserIdAndName.mockResolvedValue(null);
 
       await expect(
-        service.createProperty({ name: "Villa Roma", userId, type: "building" }),
+        service.createProperty({
+          name: "Villa Roma",
+          userId,
+          type: "building",
+        }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -163,9 +167,22 @@ describe("Property - PropertyService", () => {
     });
 
     it("should aggregate totals and count by type", async () => {
-      const building1 = makeProperty({ id: 1, currentValue: 100000, type: "building" });
-      const building2 = makeProperty({ id: 2, currentValue: 50000, type: "building" });
-      const land = makeProperty({ id: 3, currentValue: 30000, type: "land", category: undefined });
+      const building1 = makeProperty({
+        id: 1,
+        currentValue: 100000,
+        type: "building",
+      });
+      const building2 = makeProperty({
+        id: 2,
+        currentValue: 50000,
+        type: "building",
+      });
+      const land = makeProperty({
+        id: 3,
+        currentValue: 30000,
+        type: "land",
+        category: undefined,
+      });
       mockPropertyRepository.findByUserId.mockResolvedValue([
         building1,
         building2,
@@ -178,7 +195,11 @@ describe("Property - PropertyService", () => {
       expect(result.count).toBe(3);
 
       const buildingSummary = result.byType.find((b) => b.type === "building");
-      expect(buildingSummary).toEqual({ type: "building", total: 150000, count: 2 });
+      expect(buildingSummary).toEqual({
+        type: "building",
+        total: 150000,
+        count: 2,
+      });
 
       const landSummary = result.byType.find((b) => b.type === "land");
       expect(landSummary).toEqual({ type: "land", total: 30000, count: 1 });
@@ -209,7 +230,16 @@ describe("Property - PropertyService", () => {
 
     it("should throw BadRequestException when converting a land property to building without providing a category", async () => {
       // Land has no category; switching to building without supplying one must fail
-      const land = new Property(1, "Terreno", "land", 50000, "EUR", new Date(), new Date(), userId);
+      const land = new Property(
+        1,
+        "Terreno",
+        "land",
+        50000,
+        "EUR",
+        new Date(),
+        new Date(),
+        userId,
+      );
       mockPropertyRepository.findByIdAndUserId.mockResolvedValue(land);
 
       await expect(
@@ -218,7 +248,10 @@ describe("Property - PropertyService", () => {
     });
 
     it("should nullify category and cadastralSubaltern when type is updated to land", async () => {
-      const property = makeProperty({ type: "building", category: "apartment" });
+      const property = makeProperty({
+        type: "building",
+        category: "apartment",
+      });
       mockPropertyRepository.findByIdAndUserId.mockResolvedValue(property);
 
       await service.updateProperty(1, userId, { type: "land" });
@@ -230,7 +263,10 @@ describe("Property - PropertyService", () => {
     });
 
     it("should update the property when data is valid", async () => {
-      const property = makeProperty({ type: "building", category: "apartment" });
+      const property = makeProperty({
+        type: "building",
+        category: "apartment",
+      });
       mockPropertyRepository.findByIdAndUserId.mockResolvedValue(property);
       mockPropertyRepository.findByUserIdAndName.mockResolvedValue(null);
 

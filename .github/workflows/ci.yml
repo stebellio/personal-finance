@@ -67,5 +67,12 @@ jobs:
           cache: npm
           cache-dependency-path: webapp/package-lock.json
       - run: npm ci
-      - run: npm test -- --watch=false --browsers=ChromeHeadless
+      - name: Run tests (skip if no specs)
+        run: |
+          if [ -n "$(find src -name '*.spec.ts' -print -quit)" ]; then
+            npm test -- --watch=false --browsers=ChromeHeadless
+          else
+            echo "No spec files found, skipping tests"
+          fi
+        shell: bash
       - run: npm run build

@@ -77,7 +77,10 @@ describe("Analytic - AnalyticService", () => {
     it("should return all buckets with null amounts when no closures exist", async () => {
       mockClosureRepository.findByUserIdAndRange.mockResolvedValue([]);
 
-      const result = await service.getNetWorthHistory(userId, Period.TRIMESTRAL);
+      const result = await service.getNetWorthHistory(
+        userId,
+        Period.TRIMESTRAL,
+      );
 
       expect(result).toHaveLength(3);
       expect(result.every((cp) => cp.amount === null)).toBe(true);
@@ -86,8 +89,14 @@ describe("Analytic - AnalyticService", () => {
     it("should return the correct number of buckets per period", async () => {
       mockClosureRepository.findByUserIdAndRange.mockResolvedValue([]);
 
-      const trimestral = await service.getNetWorthHistory(userId, Period.TRIMESTRAL);
-      const semestral = await service.getNetWorthHistory(userId, Period.SEMESTRAL);
+      const trimestral = await service.getNetWorthHistory(
+        userId,
+        Period.TRIMESTRAL,
+      );
+      const semestral = await service.getNetWorthHistory(
+        userId,
+        Period.SEMESTRAL,
+      );
       const yearly = await service.getNetWorthHistory(userId, Period.YEARLY);
 
       expect(trimestral).toHaveLength(3);
@@ -99,7 +108,10 @@ describe("Analytic - AnalyticService", () => {
       const closure = new Closure(1, 2026, 3, 500, accountId);
       mockClosureRepository.findByUserIdAndRange.mockResolvedValue([closure]);
 
-      const result = await service.getNetWorthHistory(userId, Period.TRIMESTRAL);
+      const result = await service.getNetWorthHistory(
+        userId,
+        Period.TRIMESTRAL,
+      );
 
       const march = result.find((cp) => cp.month === 3 && cp.year === 2026);
       expect(march?.amount).toBe(500);
@@ -113,7 +125,10 @@ describe("Analytic - AnalyticService", () => {
         closureB,
       ]);
 
-      const result = await service.getNetWorthHistory(userId, Period.TRIMESTRAL);
+      const result = await service.getNetWorthHistory(
+        userId,
+        Period.TRIMESTRAL,
+      );
 
       const march = result.find((cp) => cp.month === 3 && cp.year === 2026);
       expect(march?.amount).toBe(500);
@@ -123,7 +138,10 @@ describe("Analytic - AnalyticService", () => {
       const closure = new Closure(1, 2026, 3, 500, accountId);
       mockClosureRepository.findByUserIdAndRange.mockResolvedValue([closure]);
 
-      const result = await service.getNetWorthHistory(userId, Period.TRIMESTRAL);
+      const result = await service.getNetWorthHistory(
+        userId,
+        Period.TRIMESTRAL,
+      );
 
       const feb = result.find((cp) => cp.month === 2 && cp.year === 2026);
       const apr = result.find((cp) => cp.month === 4 && cp.year === 2026);
@@ -149,7 +167,10 @@ describe("Analytic - AnalyticService", () => {
       // prediction = 2400 + 100 = 2500
       const first = new Closure(1, 2025, 5, 1200, accountId);
       const last = new Closure(2, 2026, 4, 2400, accountId);
-      mockClosureRepository.findByUserIdAndRange.mockResolvedValue([first, last]);
+      mockClosureRepository.findByUserIdAndRange.mockResolvedValue([
+        first,
+        last,
+      ]);
 
       const result = await service.getNetWorthProjection(userId);
 

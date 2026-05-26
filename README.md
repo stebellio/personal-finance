@@ -1,5 +1,7 @@
 # Personal Finance Tracker
 
+![CI](https://github.com/stebellio/personal-finance/actions/workflows/ci.yml/badge.svg)
+
 > Track bank accounts, monthly balance snapshots, real-estate properties and net-worth projections — all in one self-hosted app.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)

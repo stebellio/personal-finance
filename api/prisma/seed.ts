@@ -12,8 +12,13 @@ async function main() {
   const password = "password123";
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Clean existing users if any (though reset already cleared the DB, this is safe)
-  await prisma.user.deleteMany({ where: { email } });
+  // Clean up in correct order to respect FK constraints (SQLite doesn't support cascade on deleteMany)
+  await prisma.transaction.deleteMany();
+  await prisma.closure.deleteMany();
+  await prisma.goal.deleteMany();
+  await prisma.property.deleteMany();
+  await prisma.account.deleteMany();
+  await prisma.user.deleteMany();
 
   const user = await prisma.user.create({
     data: {
@@ -230,7 +235,99 @@ async function main() {
     data: transactionsToCreate,
   });
 
+  // 6. Create Goals
+  const savingAccount = accounts.find((a: any) => a.type === "saving");
+  const investmentAccount = accounts.find((a: any) => a.type === "investment");
+
+  const goals = [
+    {
+      accountId: savingAccount.id,
+      name: "Fondo Emergenza",
+      targetAmount: 15000.0,
+      completedAt: null,
+    },
+    {
+      accountId: savingAccount.id,
+      name: "Vacanza Estate 2027",
+      targetAmount: 3000.0,
+      completedAt: null,
+    },
+    {
+      accountId: investmentAccount.id,
+      name: "Anticipo Casa",
+      targetAmount: 50000.0,
+      completedAt: null,
+    },
+  ];
+
+  for (const goal of goals) {
+    await prisma.goal.create({ data: goal });
+    console.log(`Created goal: ${goal.name} (target: €${goal.targetAmount})`);
+  }
+
+  // 7. Create Properties (using Faker for realistic data)
+  const propertyTypes: Array<{ type: string; category: string; label: string; minSurface: number; maxSurface: number; minValue: number; maxValue: number }> = [
+    { type: "building", category: "Residenziale", label: "Appartamento",  minSurface: 45,   maxSurface: 130,  minValue: 120000, maxValue: 480000 },
+    { type: "building", category: "Residenziale", label: "Villa",         minSurface: 150,  maxSurface: 400,  minValue: 350000, maxValue: 900000 },
+    { type: "building", category: "Commerciale",  label: "Box / Garage",  minSurface: 12,   maxSurface: 30,   minValue: 15000,  maxValue: 50000  },
+    { type: "building", category: "Agricolo",     label: "Terreno",       minSurface: 1000, maxSurface: 8000, minValue: 30000,  maxValue: 150000 },
+    { type: "building", category: "Commerciale",  label: "Ufficio",       minSurface: 40,   maxSurface: 200,  minValue: 80000,  maxValue: 350000 },
+  ];
+
+  const italianCities = [
+    { city: "Milano",  province: "MI", cap: "20100" },
+    { city: "Roma",    province: "RM", cap: "00100" },
+    { city: "Torino",  province: "TO", cap: "10100" },
+    { city: "Bologna", province: "BO", cap: "40100" },
+    { city: "Firenze", province: "FI", cap: "50100" },
+    { city: "Napoli",  province: "NA", cap: "80100" },
+    { city: "Verona",  province: "VR", cap: "37100" },
+    { city: "Bergamo", province: "BG", cap: "24100" },
+  ];
+
+  const propertyStates = ["Ottimo", "Buono", "Discreto", "Da ristrutturare"];
+
+  const propertyCount = faker.number.int({ min: 2, max: 4 });
+  const usedNames = new Set<string>();
+
+  for (let i = 0; i < propertyCount; i++) {
+    const template = faker.helpers.arrayElement(propertyTypes);
+    const location = faker.helpers.arrayElement(italianCities);
+    const streetName = faker.location.street();
+    const streetNumber = faker.number.int({ min: 1, max: 120 });
+    const surface = faker.number.float({ min: template.minSurface, max: template.maxSurface, fractionDigits: 0 });
+    const currentValue = faker.number.float({ min: template.minValue, max: template.maxValue, fractionDigits: 0 });
+    const state = faker.helpers.arrayElement(propertyStates);
+
+    // Ensure unique names
+    let name = `${template.label} ${location.city}`;
+    if (usedNames.has(name)) {
+      name = `${template.label} ${location.city} ${faker.string.alpha({ length: 2, casing: "upper" })}`;
+    }
+    usedNames.add(name);
+
+    const property = {
+      name,
+      type: template.type,
+      category: template.category,
+      state,
+      address: `${streetName} ${streetNumber}, ${location.cap} ${location.city} (${location.province})`,
+      surface,
+      cadastralSheet: faker.number.int({ min: 1, max: 50 }).toString(),
+      cadastralParcel: faker.number.int({ min: 100, max: 999 }).toString(),
+      cadastralSubaltern: template.category !== "Agricolo" ? faker.number.int({ min: 1, max: 20 }).toString() : null,
+      currentValue,
+      currency: "EUR",
+      description: faker.lorem.sentence({ min: 8, max: 16 }),
+      userId: user.id,
+    };
+
+    await prisma.property.create({ data: property });
+    console.log(`Created property: ${property.name} (${property.category}, ${surface}m², €${currentValue.toLocaleString("it-IT")})`);
+  }
+
   console.log("Seeding completed successfully! 🎉");
+
 }
 
 main()

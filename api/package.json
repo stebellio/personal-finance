@@ -41,6 +41,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "@faker-js/faker": "^10.5.0",
     "@golevelup/nestjs-testing": "^0.1.2",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
@@ -82,5 +83,8 @@
     ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node"
+  },
+  "prisma": {
+    "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"
   }
 }

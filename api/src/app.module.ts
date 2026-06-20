@@ -9,6 +9,7 @@ import { ConfigModule } from "@nestjs/config";
 import { AnalyticModule } from "./analytic/analytic.module";
 import { GoalModule } from "./goal/goal.module";
 import { PropertyModule } from "./property/property.module";
+import { TransactionModule } from "./transaction/transaction.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PropertyModule } from "./property/property.module";
     AnalyticModule,
     GoalModule,
     PropertyModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

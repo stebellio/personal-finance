@@ -74,6 +74,14 @@ export class TransactionService {
     return this.transactionRepository.findByUserId(userId);
   }
 
+  async getTransactionsByUserAndRange(
+    userId: number,
+    start: Date,
+    end: Date,
+  ): Promise<Transaction[]> {
+    return this.transactionRepository.findByUserIdAndRange(userId, start, end);
+  }
+
   async updateTransaction(
     id: number,
     userId: number,

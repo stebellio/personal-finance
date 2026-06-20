@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { TransactionService } from "./services/transaction.service";
@@ -56,10 +57,17 @@ export class TransactionController {
   @Get("transactions")
   async listAll(
     @CurrentUser() user: AuthUser,
+    @Query("from") from?: string,
+    @Query("to") to?: string,
   ): Promise<TransactionPresenter[]> {
-    const transactions = await this.transactionService.getTransactionsByUser(
-      user.id,
-    );
+    const transactions =
+      from && to
+        ? await this.transactionService.getTransactionsByUserAndRange(
+            user.id,
+            new Date(from),
+            new Date(to),
+          )
+        : await this.transactionService.getTransactionsByUser(user.id);
     return transactions.map((t) => TransactionPresenter.fromModel(t));
   }
 

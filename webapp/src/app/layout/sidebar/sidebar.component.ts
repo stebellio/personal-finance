@@ -31,7 +31,7 @@ export class SidebarComponent {
         { label: 'Conti', icon: 'wallet', route: '/accounts' },
         { label: 'Chiusure', icon: 'closures', route: '/closures' },
         { label: 'Obiettivi', icon: 'target', route: '/goals' },
-        { label: 'Spese', icon: 'receipt', route: '/expenses' },
+        { label: 'Transazioni', icon: 'receipt', route: '/expenses' },
       ],
     },
     {

@@ -28,4 +28,6 @@ export interface IAccountRepository {
       createdAt?: Date;
     },
   ): Promise<void>;
+
+  updateBalance(id: number, balance: number): Promise<void>;
 }

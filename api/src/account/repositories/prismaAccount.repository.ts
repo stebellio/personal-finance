@@ -78,6 +78,13 @@ export class PrismaAccountRepository
     await this.prismaService.account.update({ where: { id }, data });
   }
 
+  async updateBalance(id: number, balance: number): Promise<void> {
+    await this.prismaService.account.update({
+      where: { id },
+      data: { balance },
+    });
+  }
+
   prismaModelToDomainModel(prismaModel: PrismaAccount): Account {
     return new Account(
       prismaModel.id,

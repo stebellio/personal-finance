@@ -4,80 +4,119 @@ import {
   Injectable,
   UnprocessableEntityException,
 } from "@nestjs/common";
-import { CLOSURE_REPOSITORY } from "../../closure/token";
-import type { IClosureRepository } from "../../closure/repositories/closureRepository.interface";
+import { TRANSACTION_REPOSITORY } from "../../transaction/token";
+import type { ITransactionRepository } from "../../transaction/repositories/transactionRepository.interface";
+import { ACCOUNT_REPOSITORY } from "../../account/token";
+import type { IAccountRepository } from "../../account/repositories/accountRepository.interface";
+import { Transaction } from "../../transaction/models/transaction.model";
 import { ClosurePeriod } from "../models/ClosurePeriod.model";
 import { Period } from "../enum/period.enum";
 
 @Injectable()
 export class AnalyticService {
   constructor(
-    @Inject(CLOSURE_REPOSITORY)
-    private readonly closureRepository: IClosureRepository,
+    @Inject(TRANSACTION_REPOSITORY)
+    private readonly transactionRepository: ITransactionRepository,
+    @Inject(ACCOUNT_REPOSITORY)
+    private readonly accountRepository: IAccountRepository,
   ) {}
 
   async getNetWorthHistory(
     userId: number,
     period: Period,
   ): Promise<ClosurePeriod[]> {
-    const closurePeriods = this.buildEmptyClosurePeriod(period);
-    const firstClosurePeriod = closurePeriods[0];
-    const lastClosurePeriod = closurePeriods[closurePeriods.length - 1];
+    const buckets = this.buildEmptyClosurePeriod(period);
+    const firstBucket = buckets[0];
+    const lastBucket = buckets[buckets.length - 1];
 
-    const closures = await this.closureRepository.findByUserIdAndRange(
+    const startDate = new Date(firstBucket.year, firstBucket.month, 1);
+    const endDate = new Date(
+      lastBucket.year,
+      lastBucket.month + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    const accounts = await this.accountRepository.findByUserId(userId);
+
+    if (!accounts.length) {
+      return buckets;
+    }
+
+    const transactions = await this.transactionRepository.findByUserIdAndRange(
       userId,
-      {
-        year: firstClosurePeriod.year,
-        month: firstClosurePeriod.month,
-      },
-      {
-        year: lastClosurePeriod.year,
-        month: lastClosurePeriod.month,
-      },
+      startDate,
+      endDate,
     );
 
-    if (!closures.length) {
-      return closurePeriods;
-    }
+    const txByAccount = this.groupTransactionsByAccount(transactions);
 
-    const periodMap = new Map(
-      closurePeriods.map((cp) => [`${cp.year}-${cp.month}`, cp]),
-    );
+    for (const bucket of buckets) {
+      const bucketEnd = new Date(bucket.year, bucket.month + 1, 0, 23, 59, 59, 999);
+      let netWorth = 0;
 
-    for (const closure of closures) {
-      const cp = periodMap.get(`${closure.year}-${closure.month}`);
-      if (cp) {
-        cp.amount = (cp.amount ?? 0) + closure.amount;
+      for (const account of accounts) {
+        if (account.createdAt > bucketEnd) continue;
+
+        const accountTxs = txByAccount.get(account.id) ?? [];
+        let sumAfter = 0;
+        for (const tx of accountTxs) {
+          if (tx.date > bucketEnd) {
+            sumAfter += tx.amount;
+          }
+        }
+
+        const balanceAtEnd = account.balance - sumAfter;
+        netWorth += account.type === "debit" ? -balanceAtEnd : balanceAtEnd;
       }
+
+      bucket.amount = netWorth;
     }
 
-    return closurePeriods;
+    return buckets;
   }
 
   async getNetWorthProjection(
     userId: number,
   ): Promise<{ month: number; year: number; amount: number }> {
-    const closurePeriods = await this.getNetWorthHistory(userId, Period.YEARLY);
+    const periods = await this.getNetWorthHistory(userId, Period.YEARLY);
 
-    if (!closurePeriods || closurePeriods.length < 1) {
-      throw new UnprocessableEntityException("Invalid closure period.");
+    if (!periods || periods.length < 1) {
+      throw new UnprocessableEntityException("Invalid period.");
     }
 
-    const firstClosurePeriod = closurePeriods[0];
-    const lastClosurePeriod = closurePeriods[closurePeriods.length - 1];
+    const first = periods[0];
+    const last = periods[periods.length - 1];
     const nextMonthDate = new Date();
     nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
 
     const avgAmount =
-      ((lastClosurePeriod.amount ?? 0) - (firstClosurePeriod.amount ?? 0)) /
-      closurePeriods.length;
-    const predictedAmount = (lastClosurePeriod.amount ?? 0) + avgAmount;
+      ((last.amount ?? 0) - (first.amount ?? 0)) / periods.length;
+    const predictedAmount = (last.amount ?? 0) + avgAmount;
 
     return {
       month: nextMonthDate.getMonth(),
       year: nextMonthDate.getFullYear(),
       amount: predictedAmount,
     };
+  }
+
+  private groupTransactionsByAccount(
+    transactions: Transaction[],
+  ): Map<number, Transaction[]> {
+    const map = new Map<number, Transaction[]>();
+    for (const tx of transactions) {
+      const list = map.get(tx.accountId);
+      if (list) {
+        list.push(tx);
+      } else {
+        map.set(tx.accountId, [tx]);
+      }
+    }
+    return map;
   }
 
   private buildEmptyClosurePeriod(period: Period): ClosurePeriod[] {

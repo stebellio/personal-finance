@@ -87,6 +87,7 @@ export class PrismaAccountRepository
       prismaModel.currency,
       prismaModel.type as AccountType,
       prismaModel.description ?? undefined,
+      prismaModel.createdAt,
     );
   }
 }

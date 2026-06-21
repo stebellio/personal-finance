@@ -7,6 +7,7 @@ export class Account {
   balance: number;
   currency: string;
   type: AccountType;
+  createdAt: Date;
 
   constructor(
     id: number,
@@ -15,6 +16,7 @@ export class Account {
     currency: string,
     type: AccountType,
     description?: string,
+    createdAt?: Date,
   ) {
     this.id = id;
     this.name = name;
@@ -22,5 +24,6 @@ export class Account {
     this.balance = balance;
     this.currency = currency;
     this.type = type;
+    this.createdAt = createdAt ?? new Date();
   }
 }

@@ -8,6 +8,7 @@ export interface IAccountRepository {
     balance: number;
     currency: string;
     type: AccountType;
+    importProviderType?: string;
     createdAt?: Date;
   }): Promise<number>;
 
@@ -25,6 +26,7 @@ export interface IAccountRepository {
       name?: string;
       description?: string;
       type?: AccountType;
+      importProviderType?: string | null;
       createdAt?: Date;
     },
   ): Promise<void>;

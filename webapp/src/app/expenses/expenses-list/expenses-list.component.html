@@ -5,12 +5,20 @@
       <h1 class="expenses__title">Le tue <span>transazioni</span></h1>
       <p class="expenses__subtitle">Monitora entrate e uscite per tutti i tuoi conti.</p>
     </div>
-    <button type="button" class="cta" (click)="openCreateModal()" [disabled]="accounts.length === 0">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      <span>Nuova transazione</span>
-    </button>
+    <div class="expenses__actions">
+      <button type="button" class="cta cta--ghost" (click)="openImportModal()" [disabled]="accounts.length === 0">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Importa CSV</span>
+      </button>
+      <button type="button" class="cta" (click)="openCreateModal()" [disabled]="accounts.length === 0">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Nuova transazione</span>
+      </button>
+    </div>
   </header>
 
   <div class="expenses__filters">
@@ -246,5 +254,85 @@
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Import CSV modal -->
+<div class="modal" *ngIf="isImportModalOpen" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+  <div class="modal__backdrop" (click)="closeImportModal()"></div>
+  <div class="modal__dialog">
+    <header class="modal__header">
+      <div>
+        <p class="modal__eyebrow">Importa transazioni</p>
+        <h2 id="importModalTitle" class="modal__title">Carica file CSV</h2>
+      </div>
+      <button type="button" class="modal__close" (click)="closeImportModal()" [disabled]="importing" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </header>
+
+    <ng-container *ngIf="!importResult; else importResultTpl">
+      <form class="modal__form" (ngSubmit)="submitImport()" #importForm="ngForm" novalidate>
+
+        <div class="form-field">
+          <label for="import-account">Conto</label>
+          <select id="import-account" name="importAccountId" [(ngModel)]="importAccountId" required>
+            <option *ngFor="let a of accounts" [ngValue]="a.id">{{ a.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="import-file">File CSV</label>
+          <input
+            id="import-file"
+            type="file"
+            name="file"
+            accept=".csv"
+            (change)="onImportFileSelected($event)"
+            required
+          />
+        </div>
+
+        <div class="modal__alert" *ngIf="importError" role="alert">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M12 8v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="12" cy="16" r="1" fill="currentColor"/>
+          </svg>
+          <span>{{ importError }}</span>
+        </div>
+
+        <div class="modal__actions">
+          <button type="button" class="btn btn--ghost" (click)="closeImportModal()" [disabled]="importing">Annulla</button>
+          <button type="submit" class="btn btn--primary" [disabled]="importing || !importFile || !importAccountId">
+            <svg *ngIf="importing" class="spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="10"/>
+            </svg>
+            <span *ngIf="!importing">Importa</span>
+            <span *ngIf="importing">Importazione...</span>
+          </button>
+        </div>
+      </form>
+    </ng-container>
+
+    <ng-template #importResultTpl>
+      <div class="modal__body">
+        <div class="import-success">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p>
+            <strong>{{ importResult?.imported }}</strong> transazioni importate,
+            <strong>{{ importResult?.skipped }}</strong> duplicate saltate.
+          </p>
+        </div>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--primary" (click)="closeImportModal()">Chiudi</button>
+        </div>
+      </div>
+    </ng-template>
   </div>
 </div>

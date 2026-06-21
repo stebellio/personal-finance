@@ -37,4 +37,13 @@ export class TransactionService {
   getCategories(): Observable<Category[]> {
     return this.http.get<Category[]>(`${this.apiUrl}/categories`);
   }
+
+  importCsv(accountId: number, file: File): Observable<{ imported: number; skipped: number }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ imported: number; skipped: number }>(
+      `${this.apiUrl}/accounts/${accountId}/transactions/import`,
+      formData,
+    );
+  }
 }

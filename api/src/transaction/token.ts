@@ -1,1 +1,2 @@
 export const TRANSACTION_REPOSITORY = "ITransactionRepository";
+export const TRANSACTION_STRATEGIES = "TRANSACTION_STRATEGIES";

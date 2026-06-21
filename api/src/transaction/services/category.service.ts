@@ -38,6 +38,15 @@ export class CategoryService {
     });
   }
 
+  async findByDescriptionLike(description: string, userId: number) {
+    return this.prismaService.category.findFirst({
+      where: {
+        userId,
+        description: { contains: description },
+      },
+    });
+  }
+
   async findOne(id: number, userId: number) {
     const category = await this.prismaService.category.findFirst({
       where: { id, userId },

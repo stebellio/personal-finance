@@ -78,6 +78,7 @@ export class AccountService {
       name?: string;
       description?: string;
       type?: AccountType;
+      importProviderType?: string | null;
       createdAt?: string;
     },
   ): Promise<void> {
@@ -97,6 +98,7 @@ export class AccountService {
       name?: string;
       description?: string;
       type?: AccountType;
+      importProviderType?: string | null;
       createdAt?: Date;
     } = {};
 
@@ -104,6 +106,8 @@ export class AccountService {
     if (data.description !== undefined)
       updateData.description = data.description;
     if (data.type !== undefined) updateData.type = data.type;
+    if (data.importProviderType !== undefined)
+      updateData.importProviderType = data.importProviderType;
     if (data.createdAt) updateData.createdAt = new Date(data.createdAt);
 
     await this.accountRepository.update(account.id, updateData);

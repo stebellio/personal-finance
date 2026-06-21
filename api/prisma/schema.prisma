@@ -25,30 +25,34 @@ model User {
 }
 
 model Account {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String?
-  balance     Float     @default(0)
-  currency    String    @default("EUR")
-  type        String    @default("checking")
-  createdAt   DateTime  @default(now())
-  userId      Int
-  user        User      @relation(fields: [userId], references: [id])
-  goals       Goal[]
-  transactions Transaction[]
+  id                 Int       @id @default(autoincrement())
+  name               String
+  description        String?
+  balance            Float     @default(0)
+  currency           String    @default("EUR")
+  type               String    @default("checking")
+  importProviderType String?
+  createdAt          DateTime  @default(now())
+  userId             Int
+  user               User      @relation(fields: [userId], references: [id])
+  goals              Goal[]
+  transactions       Transaction[]
 }
 
 model Transaction {
-  id         Int       @id @default(autoincrement())
-  amount     Float
-  date       DateTime
-  note       String?
-  categoryId Int?
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  accountId  Int
-  account    Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  id          Int       @id @default(autoincrement())
+  amount      Float
+  date        DateTime
+  note        String?
+  fingerprint String?
+  categoryId  Int?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  accountId   Int
+  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, fingerprint])
 }
 
 model Category {

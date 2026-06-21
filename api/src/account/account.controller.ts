@@ -66,6 +66,7 @@ export class AccountController {
       name?: string;
       description?: string;
       type?: AccountType;
+      importProviderType?: string | null;
       createdAt?: string;
     },
   ): Promise<void> {

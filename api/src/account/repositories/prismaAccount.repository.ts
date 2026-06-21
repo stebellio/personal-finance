@@ -18,6 +18,7 @@ export class PrismaAccountRepository
     balance: number;
     currency: string;
     type: AccountType;
+    importProviderType?: string;
     createdAt?: Date;
   }): Promise<number> {
     const model = await this.prismaService.account.create({
@@ -72,6 +73,7 @@ export class PrismaAccountRepository
       name?: string;
       description?: string;
       type?: AccountType;
+      importProviderType?: string | null;
       createdAt?: Date;
     },
   ): Promise<void> {
@@ -94,6 +96,7 @@ export class PrismaAccountRepository
       prismaModel.type as AccountType,
       prismaModel.description ?? undefined,
       prismaModel.createdAt,
+      prismaModel.importProviderType ?? undefined,
     );
   }
 }

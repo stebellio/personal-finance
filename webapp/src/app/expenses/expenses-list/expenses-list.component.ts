@@ -56,6 +56,13 @@ export class ExpensesListComponent implements OnInit {
   deleting = false;
   deleteError: string | null = null;
 
+  isImportModalOpen = false;
+  importAccountId: number | null = null;
+  importFile: File | null = null;
+  importing = false;
+  importError: string | null = null;
+  importResult: { imported: number; skipped: number } | null = null;
+
   constructor(
     private readonly transactionService: TransactionService,
     private readonly accountService: AccountService,
@@ -160,6 +167,54 @@ export class ExpensesListComponent implements OnInit {
         },
         error: () => {
           this.deleteError = 'Impossibile eliminare la transazione. Riprova più tardi.';
+        },
+      });
+  }
+
+  openImportModal(): void {
+    this.importAccountId = this.accounts[0]?.id ?? null;
+    this.importFile = null;
+    this.importError = null;
+    this.importResult = null;
+    this.isImportModalOpen = true;
+  }
+
+  closeImportModal(): void {
+    if (this.importing) return;
+    this.isImportModalOpen = false;
+  }
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.importFile = input.files[0];
+    }
+  }
+
+  submitImport(): void {
+    if (!this.importAccountId) {
+      this.importError = 'Seleziona un conto.';
+      return;
+    }
+    if (!this.importFile) {
+      this.importError = 'Seleziona un file CSV.';
+      return;
+    }
+
+    this.importing = true;
+    this.importError = null;
+    this.importResult = null;
+
+    this.transactionService
+      .importCsv(this.importAccountId, this.importFile)
+      .pipe(finalize(() => (this.importing = false)))
+      .subscribe({
+        next: result => {
+          this.importResult = result;
+          this.loadTransactions();
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.importError = err.error?.message ?? 'Impossibile importare il file. Riprova più tardi.';
         },
       });
   }

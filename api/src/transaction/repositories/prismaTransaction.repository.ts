@@ -23,6 +23,7 @@ export class PrismaTransactionRepository
     date: Date;
     note?: string;
     categoryId?: number;
+    fingerprint?: string;
   }): Promise<Transaction> {
     const model = await this.prismaService.transaction.create({
       data,
@@ -57,6 +58,16 @@ export class PrismaTransactionRepository
       include: transactionInclude,
     });
     return models.map((m) => this.prismaModelToDomainModel(m));
+  }
+
+  async findByAccountIdAndFingerprint(
+    accountId: number,
+    fingerprint: string,
+  ): Promise<Transaction | null> {
+    const model = await this.prismaService.transaction.findFirst({
+      where: { accountId, fingerprint },
+    });
+    return model ? this.prismaModelToDomainModel(model) : null;
   }
 
   async findByUserId(userId: number): Promise<Transaction[]> {
@@ -116,6 +127,7 @@ export class PrismaTransactionRepository
       model.date,
       model.accountId,
       model.note ?? undefined,
+      model.fingerprint ?? undefined,
       model.categoryId ?? undefined,
       model.category ?? undefined,
       model.createdAt,

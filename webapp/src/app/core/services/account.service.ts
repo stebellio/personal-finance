@@ -15,11 +15,11 @@ export class AccountService {
       .get<Account[]>(`${this.apiUrl}/accounts`)
   }
 
-  createAccount(payload: { name: string; description?: string; balance?: number; type?: string; createdAt?: string }): Observable<number> {
+  createAccount(payload: { name: string; description?: string; balance?: number; type?: string; importProviderType?: string; createdAt?: string }): Observable<number> {
     return this.http.post<number>(`${this.apiUrl}/accounts`, payload);
   }
 
-  updateAccount(id: number, payload: { name: string; description?: string; type?: string; createdAt?: string }): Observable<void> {
+  updateAccount(id: number, payload: { name: string; description?: string; type?: string; importProviderType?: string | null; createdAt?: string }): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/accounts/${id}`, payload);
   }
 

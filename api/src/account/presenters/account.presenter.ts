@@ -7,6 +7,7 @@ export class AccountPresenter {
   balance?: number;
   currency?: string;
   type: AccountType;
+  importProviderType?: string;
   createdAt: Date;
 
   constructor(
@@ -17,6 +18,7 @@ export class AccountPresenter {
     createdAt: Date,
     balance?: number,
     currency?: string,
+    importProviderType?: string,
   ) {
     this.id = id;
     this.name = name;
@@ -25,6 +27,7 @@ export class AccountPresenter {
     this.createdAt = createdAt;
     this.balance = balance;
     this.currency = currency;
+    this.importProviderType = importProviderType;
   }
 
   static fromModel(account: Account): AccountPresenter {
@@ -36,6 +39,7 @@ export class AccountPresenter {
       account.createdAt,
       account.balance,
       account.currency ?? "EUR",
+      account.importProviderType,
     );
   }
 }

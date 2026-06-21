@@ -21,6 +21,7 @@ export class TransactionService {
     date: Date;
     note?: string;
     categoryId?: number;
+    fingerprint?: string;
   }): Promise<Transaction> {
     const account = await this.accountRepository.findByIdAndUserId(
       data.accountId,
@@ -37,6 +38,7 @@ export class TransactionService {
       date: data.date,
       note: data.note,
       categoryId: data.categoryId,
+      fingerprint: data.fingerprint,
     });
 
     await this.accountRepository.updateBalance(
@@ -45,6 +47,16 @@ export class TransactionService {
     );
 
     return transaction;
+  }
+
+  async findByFingerprint(
+    accountId: number,
+    fingerprint: string,
+  ): Promise<Transaction | null> {
+    return this.transactionRepository.findByAccountIdAndFingerprint(
+      accountId,
+      fingerprint,
+    );
   }
 
   async getTransaction(id: number, userId: number): Promise<Transaction> {

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -9,9 +10,13 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { TransactionService } from "./services/transaction.service";
 import { TransactionPresenter } from "./presenters/transaction.presenter";
+import { ImportService } from "./services/import/import.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { CurrentUser } from "../auth/currentUser.decorator";
 import type { AuthUser } from "../auth/models/authUser.model";
@@ -19,7 +24,10 @@ import type { AuthUser } from "../auth/models/authUser.model";
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class TransactionController {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(
+    private readonly transactionService: TransactionService,
+    private readonly importService: ImportService,
+  ) {}
 
   @Post("accounts/:accountId/transactions")
   async create(
@@ -110,6 +118,24 @@ export class TransactionController {
       },
     );
     return TransactionPresenter.fromModel(transaction);
+  }
+
+  @Post("accounts/:accountId/transactions/import")
+  @UseInterceptors(FileInterceptor("file"))
+  async importCsv(
+    @CurrentUser() user: AuthUser,
+    @Param("accountId", ParseIntPipe) accountId: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException("File is required");
+    }
+
+    return this.importService.importCsv(
+      file.buffer.toString("utf-8"),
+      accountId,
+      user.id,
+    );
   }
 
   @Delete("transactions/:id")

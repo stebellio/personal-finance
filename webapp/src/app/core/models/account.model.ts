@@ -7,5 +7,6 @@ export interface Account {
   balance?: number;
   currency?: string;
   type?: AccountType;
+  importProviderType?: string;
   createdAt?: string;
 }

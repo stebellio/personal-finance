@@ -192,6 +192,18 @@
       </div>
 
       <div class="form-field">
+        <label for="account-import-provider">Importazione CSV <span class="form-field__optional">(opzionale)</span></label>
+        <select
+          id="account-import-provider"
+          name="importProviderType"
+          [(ngModel)]="formData.importProviderType"
+        >
+          <option [ngValue]="null">Nessuno</option>
+          <option *ngFor="let p of importProviderTypes" [ngValue]="p.value">{{ p.label }}</option>
+        </select>
+      </div>
+
+      <div class="form-field">
         <label for="account-created-at">Data creazione <span class="form-field__optional">(opzionale)</span></label>
         <input
           id="account-created-at"

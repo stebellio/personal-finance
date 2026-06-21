@@ -23,8 +23,9 @@ export class AccountsListComponent implements OnInit {
     description: string;
     balance: number;
     type: AccountType;
+    importProviderType: string | null;
     createdAt: string;
-  } = { name: '', description: '', balance: 0, type: 'checking', createdAt: '' };
+  } = { name: '', description: '', balance: 0, type: 'checking', importProviderType: null, createdAt: '' };
 
   saving = false;
   saveError: string | null = null;
@@ -40,6 +41,11 @@ export class AccountsListComponent implements OnInit {
     { value: 'debit', label: 'Debito' },
   ];
 
+  readonly importProviderTypes: { value: string; label: string }[] = [
+    { value: 'revolut', label: 'Revolut' },
+    { value: 'intesa-san-paolo', label: 'Intesa San Paolo' },
+  ];
+
   constructor(private readonly accountService: AccountService) {}
 
   ngOnInit(): void {
@@ -51,7 +57,7 @@ export class AccountsListComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    this.formData = { name: '', description: '', balance: 0, type: 'checking', createdAt: '' };
+    this.formData = { name: '', description: '', balance: 0, type: 'checking', importProviderType: null, createdAt: '' };
     this.saveError = null;
     this.modalMode = 'create';
     this.editingAccountId = null;
@@ -64,6 +70,7 @@ export class AccountsListComponent implements OnInit {
       description: account.description ?? '',
       balance: account.balance ?? 0,
       type: account.type ?? 'checking',
+      importProviderType: account.importProviderType ?? null,
       createdAt: account.createdAt ? account.createdAt.substring(0, 10) : '',
     };
     this.saveError = null;
@@ -128,7 +135,7 @@ export class AccountsListComponent implements OnInit {
     this.saving = true;
     this.saveError = null;
     this.accountService
-      .createAccount({ name, description: description || undefined, balance, type: this.formData.type, createdAt: this.formData.createdAt || undefined })
+      .createAccount({ name, description: description || undefined, balance, type: this.formData.type, importProviderType: this.formData.importProviderType ?? undefined, createdAt: this.formData.createdAt || undefined })
       .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {
@@ -150,6 +157,7 @@ export class AccountsListComponent implements OnInit {
         name,
         description: description || undefined,
         type: this.formData.type,
+        importProviderType: this.formData.importProviderType,
         createdAt: this.formData.createdAt || undefined,
       })
       .pipe(finalize(() => (this.saving = false)))

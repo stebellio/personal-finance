@@ -15,6 +15,12 @@
   margin-bottom: 28px;
   flex-wrap: wrap;
 }
+.expenses__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 .expenses__filters {
   display: flex;
   align-items: flex-end;
@@ -289,6 +295,28 @@
 .cta--ghost:hover:not(:disabled) {
   background: rgba(99, 102, 241, 0.14);
   box-shadow: none;
+}
+.import-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  text-align: center;
+}
+.import-success svg {
+  width: 44px;
+  height: 44px;
+  color: #10b981;
+}
+.import-success p {
+  margin: 0;
+  font-size: 15px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+.import-success strong {
+  color: #1f2937;
 }
 .modal {
   position: fixed;

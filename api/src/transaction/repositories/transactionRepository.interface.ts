@@ -7,6 +7,7 @@ export interface ITransactionRepository {
     date: Date;
     note?: string;
     categoryId?: number;
+    fingerprint?: string;
   }): Promise<Transaction>;
 
   findById(id: number): Promise<Transaction | null>;
@@ -14,6 +15,11 @@ export interface ITransactionRepository {
   findByIdAndUserId(id: number, userId: number): Promise<Transaction | null>;
 
   findByAccountId(accountId: number): Promise<Transaction[]>;
+
+  findByAccountIdAndFingerprint(
+    accountId: number,
+    fingerprint: string,
+  ): Promise<Transaction | null>;
 
   findByUserId(userId: number): Promise<Transaction[]>;
 

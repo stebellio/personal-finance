@@ -34,22 +34,8 @@ model Account {
   createdAt   DateTime  @default(now())
   userId      Int
   user        User      @relation(fields: [userId], references: [id])
-  closures    Closure[]
   goals       Goal[]
   transactions Transaction[]
-}
-
-model Closure {
-  id        Int      @id @default(autoincrement())
-  year      Int
-  month     Int
-  amount    Float
-  note      String?
-  createdAt DateTime @default(now())
-  accountId Int
-  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-
-  @@unique([accountId, year, month])
 }
 
 model Transaction {

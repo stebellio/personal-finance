@@ -15,7 +15,6 @@ async function main() {
   // Clean up in correct order to respect FK constraints (SQLite doesn't support cascade on deleteMany)
   await prisma.transaction.deleteMany();
   await prisma.category.deleteMany();
-  await prisma.closure.deleteMany();
   await prisma.goal.deleteMany();
   await prisma.property.deleteMany();
   await prisma.account.deleteMany();
@@ -174,7 +173,7 @@ async function main() {
     fractionDigits: 2,
   });
 
-  // Group transactions by account to calculate balances and closures
+  // Group transactions by account to calculate balances
   const transactionsToCreate: {
     accountId: number;
     amount: number;
@@ -338,20 +337,6 @@ async function main() {
           });
           runningBalance += t.amount;
         }
-      }
-
-      // 4. Create Closure for this month (1-indexed month)
-      // Closures are recorded as the total balance at the end of the month
-      if (currentDate <= now) {
-        await prisma.closure.create({
-          data: {
-            year,
-            month: month + 1,
-            amount: parseFloat(runningBalance.toFixed(2)),
-            accountId: account.id,
-            note: `Chiusura automatica ${month + 1}/${year}`,
-          },
-        });
       }
 
       // Move to next month

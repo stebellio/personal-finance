@@ -19,8 +19,6 @@ export interface IAccountRepository {
 
   findByUserIdAndName(userId: number, name: string): Promise<Account | null>;
 
-  updateBalance(id: number, balance: number): Promise<void>;
-
   update(
     id: number,
     data: {

@@ -29,7 +29,6 @@ export class SidebarComponent {
       label: 'Finanziario',
       items: [
         { label: 'Conti', icon: 'wallet', route: '/accounts' },
-        { label: 'Chiusure', icon: 'closures', route: '/closures' },
         { label: 'Obiettivi', icon: 'target', route: '/goals' },
         { label: 'Transazioni', icon: 'receipt', route: '/expenses' },
       ],

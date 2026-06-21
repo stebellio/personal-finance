@@ -51,13 +51,6 @@ export class PrismaAccountRepository
     await this.prismaService.account.delete({ where: { id } });
   }
 
-  async updateBalance(id: number, balance: number): Promise<void> {
-    await this.prismaService.account.update({
-      where: { id },
-      data: { balance },
-    });
-  }
-
   async findByUserIdAndName(
     userId: number,
     name: string,

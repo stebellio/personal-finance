@@ -4,7 +4,6 @@ import { AppService } from "./app.service";
 import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
 import { AccountModule } from "./account/account.module";
-import { ClosureModule } from "./closure/closure.module";
 import { ConfigModule } from "@nestjs/config";
 import { AnalyticModule } from "./analytic/analytic.module";
 import { GoalModule } from "./goal/goal.module";
@@ -17,7 +16,6 @@ import { TransactionModule } from "./transaction/transaction.module";
     PrismaModule,
     AuthModule,
     AccountModule,
-    ClosureModule,
     AnalyticModule,
     GoalModule,
     PropertyModule,

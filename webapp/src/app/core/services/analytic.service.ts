@@ -6,6 +6,7 @@ import { Observable, of } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { NetWorthPoint } from "../models/netWorthPoint.model";
 import { NetWorthProjection } from "../models/netWorthProjection.model";
+import { ExpenseCategory } from "../models/expenseCategory.model";
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticService {
@@ -22,5 +23,10 @@ export class AnalyticService {
         return this.http
             .get<NetWorthProjection>(`${this.apiUrl}/analytics/net-worth-projection`)
             .pipe(catchError(() => of(null)));
+    }
+
+    getExpensesByCategory(period: Period): Observable<ExpenseCategory[]> {
+        const params = new HttpParams().set('period', period);
+        return this.http.get<ExpenseCategory[]>(`${this.apiUrl}/analytics/expenses-by-category`, { params });
     }
 }

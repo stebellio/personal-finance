@@ -127,26 +127,78 @@ export class AnalyticService {
     return map;
   }
 
+  async getExpensesByCategory(
+    userId: number,
+    period: Period,
+  ): Promise<
+    { categoryCode: string; categoryDescription: string; total: number }[]
+  > {
+    const { startDate, endDate } = this.getDateRange(period);
+
+    const transactions = await this.transactionRepository.findByUserIdAndRange(
+      userId,
+      startDate,
+      endDate,
+    );
+
+    const expenses = transactions.filter((tx) => tx.amount < 0);
+
+    const grouped = new Map<
+      string,
+      { categoryCode: string; categoryDescription: string; total: number }
+    >();
+
+    for (const tx of expenses) {
+      const code = tx.category?.code ?? "__uncategorized__";
+      const desc = tx.category?.description ?? "Non categorizzato";
+      const existing = grouped.get(code);
+      if (existing) {
+        existing.total += Math.abs(tx.amount);
+      } else {
+        grouped.set(code, {
+          categoryCode: code,
+          categoryDescription: desc,
+          total: Math.abs(tx.amount),
+        });
+      }
+    }
+
+    return Array.from(grouped.values()).sort((a, b) => b.total - a.total);
+  }
+
+  private getMonthsBack(period: Period): number {
+    switch (period) {
+      case Period.TRIMESTRAL:
+        return 3;
+      case Period.SEMESTRAL:
+        return 6;
+      case Period.YEARLY:
+        return 12;
+      default:
+        throw new BadRequestException("Invalid period");
+    }
+  }
+
+  private getDateRange(period: Period): {
+    startDate: Date;
+    endDate: Date;
+  } {
+    const now = new Date();
+    const monthsBack = this.getMonthsBack(period);
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const startDate = new Date(currentYear, currentMonth - monthsBack + 1, 1);
+    const endDate = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+
+    return { startDate, endDate };
+  }
+
   private buildEmptyClosurePeriod(period: Period): ClosurePeriod[] {
     const now = new Date();
     let currentMonth = now.getMonth();
     let currentYear = now.getFullYear();
-
-    let monthsBack: number;
-
-    switch (period) {
-      case Period.TRIMESTRAL:
-        monthsBack = 3;
-        break;
-      case Period.SEMESTRAL:
-        monthsBack = 6;
-        break;
-      case Period.YEARLY:
-        monthsBack = 12;
-        break;
-      default:
-        throw new BadRequestException("Invalid period");
-    }
+    const monthsBack = this.getMonthsBack(period);
 
     const buckets: ClosurePeriod[] = [];
 

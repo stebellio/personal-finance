@@ -214,6 +214,10 @@
   &__body {
     margin: 0 -8px;
     min-height: 320px;
+
+    &--compact {
+      min-height: auto;
+    }
   }
 }
 
@@ -296,7 +300,10 @@
   &__toolbar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     margin-bottom: 28px;
+    flex-wrap: wrap;
   }
 
   &__section-divider {

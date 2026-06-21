@@ -5,6 +5,7 @@ import type { AuthUser } from "../auth/models/authUser.model";
 import { NetWorthHistoryQueryDto } from "./dto/netWorthHistoryQuery.dto";
 import { NetWorthHistoryPresenter } from "./presenters/netWorthHistory.presenter";
 import { NetWorthProjectionPresenter } from "./presenters/netWorthProjection.presenter";
+import { ExpensesByCategoryPresenter } from "./presenters/expensesByCategory.presenter";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @Controller("analytics")
@@ -31,5 +32,18 @@ export class AnalyticController {
       user.id,
     );
     return NetWorthProjectionPresenter.fromModel(projection);
+  }
+
+  @Get("expenses-by-category")
+  async getExpensesByCategory(
+    @CurrentUser() user: AuthUser,
+    @Query() dto: NetWorthHistoryQueryDto,
+  ) {
+    const expenses = await this.analyticService.getExpensesByCategory(
+      user.id,
+      dto.period,
+    );
+
+    return expenses.map((e) => ExpensesByCategoryPresenter.fromModel(e));
   }
 }

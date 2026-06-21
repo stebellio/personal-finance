@@ -176,6 +176,9 @@
   margin: 0 -8px;
   min-height: 320px;
 }
+.chart-card__body--compact {
+  min-height: auto;
+}
 .period-segmented {
   display: inline-flex;
   padding: 4px;
@@ -246,7 +249,10 @@
 .dashboard__toolbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 28px;
+  flex-wrap: wrap;
 }
 .dashboard__section-divider {
   display: flex;

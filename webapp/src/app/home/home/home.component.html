@@ -23,6 +23,19 @@
         {{ m.label }}
       </button>
     </div>
+
+    <div class="period-segmented" role="tablist" aria-label="Seleziona periodo" *ngIf="showFinancial">
+      <button
+        *ngFor="let p of periods"
+        type="button"
+        role="tab"
+        [attr.aria-selected]="selectedPeriod === p.value"
+        [class.is-active]="selectedPeriod === p.value"
+        (click)="onPeriodChange(p.value)"
+      >
+        {{ p.label }}
+      </button>
+    </div>
   </div>
 
   <div class="dashboard__alert dashboard__alert--error" *ngIf="error" role="alert">
@@ -59,19 +72,6 @@
           <span class="chart-card__delta-pct">({{ isPositiveTrend ? '+' : '' }}{{ netWorthDeltaPercent | number:'1.1-1' }}%)</span>
         </span>
       </div>
-
-      <div class="period-segmented" role="tablist" aria-label="Seleziona periodo">
-        <button
-          *ngFor="let p of periods"
-          type="button"
-          role="tab"
-          [attr.aria-selected]="selectedPeriod === p.value"
-          [class.is-active]="selectedPeriod === p.value"
-          (click)="onPeriodChange(p.value)"
-        >
-          {{ p.label }}
-        </button>
-      </div>
     </header>
 
     <div class="chart-card__body">
@@ -92,6 +92,33 @@
         ></apx-chart>
       </ng-container>
 
+      <ng-template #chartSkeleton>
+        <div class="chart-skeleton" aria-busy="true" aria-live="polite"></div>
+      </ng-template>
+    </div>
+  </article>
+
+  <article class="chart-card" *ngIf="!loadingExpenses && expensesByCategory.length">
+    <header class="chart-card__header">
+      <div class="chart-card__heading">
+        <p class="chart-card__eyebrow">Spese per categoria</p>
+      </div>
+    </header>
+    <div class="chart-card__body chart-card__body--compact">
+      <ng-container *ngIf="!loadingExpenses; else chartSkeleton">
+        <apx-chart
+          [series]="expenseBarOptions.series"
+          [chart]="expenseBarOptions.chart"
+          [xaxis]="expenseBarOptions.xaxis"
+          [yaxis]="expenseBarOptions.yaxis"
+          [plotOptions]="expenseBarOptions.plotOptions"
+          [dataLabels]="expenseBarOptions.dataLabels"
+          [colors]="expenseBarOptions.colors"
+          [grid]="expenseBarOptions.grid"
+          [tooltip]="expenseBarOptions.tooltip"
+          [legend]="expenseBarOptions.legend"
+        ></apx-chart>
+      </ng-container>
       <ng-template #chartSkeleton>
         <div class="chart-skeleton" aria-busy="true" aria-live="polite"></div>
       </ng-template>

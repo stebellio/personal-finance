@@ -13,6 +13,7 @@ import { NetWorthPoint } from "../../core/models/netWorthPoint.model";
 import { NetWorthProjection } from "../../core/models/netWorthProjection.model";
 import { PropertyService } from '../../core/services/property.service';
 import { PropertySummary } from '../../core/models/property.model';
+import { ExpenseCategory } from '../../core/models/expenseCategory.model';
 
 export type DashboardMode = 'financial' | 'real-estate' | 'both';
 const DASHBOARD_MODE_KEY = 'dashboard-mode';
@@ -52,6 +53,19 @@ export type ChartOptions = {
   legend: ApexLegend;
 };
 
+export type ExpenseBarOptions = {
+  series: ApexAxisChartSeries;
+  chart: ApexChart;
+  xaxis: ApexXAxis;
+  yaxis: ApexYAxis;
+  plotOptions: ApexPlotOptions;
+  dataLabels: ApexDataLabels;
+  grid: ApexGrid;
+  colors: string[];
+  tooltip: ApexTooltip;
+  legend: ApexLegend;
+};
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -73,6 +87,10 @@ export class HomeComponent implements OnInit {
   netWorthData: NetWorthPoint[] = [];
   netWorthProjection: NetWorthProjection | null = null;
   chartOptions: ChartOptions = this.buildChartOptions([], [], null);
+
+  expensesByCategory: ExpenseCategory[] = [];
+  loadingExpenses = false;
+  expenseBarOptions: ExpenseBarOptions = this.buildExpenseBarOptions([]);
 
   readonly assetColors = ['#6366f1', '#764ba2', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#06b6d4', '#f97316'];
   readonly liabilityColors = ['#ef4444', '#f87171', '#fca5a5'];
@@ -104,6 +122,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.loadAccounts();
     this.loadNetWorthHistory();
+    this.loadExpensesByCategory();
     this.loadPropertySummary();
   }
 
@@ -236,6 +255,7 @@ export class HomeComponent implements OnInit {
     if (this.selectedPeriod === period) return;
     this.selectedPeriod = period;
     this.loadNetWorthHistory();
+    this.loadExpensesByCategory();
   }
 
   onModeChange(mode: DashboardMode): void {
@@ -289,6 +309,85 @@ export class HomeComponent implements OnInit {
         projection,
       );
     });
+  }
+
+  private loadExpensesByCategory(): void {
+    this.loadingExpenses = true;
+
+    this.analyticsService.getExpensesByCategory(this.selectedPeriod).pipe(
+      catchError(() => of<ExpenseCategory[]>([])),
+      finalize(() => (this.loadingExpenses = false)),
+    ).subscribe(categories => {
+      this.expensesByCategory = categories;
+      this.expenseBarOptions = this.buildExpenseBarOptions(categories);
+    });
+  }
+
+  private buildExpenseBarOptions(categories: ExpenseCategory[]): ExpenseBarOptions {
+    const sorted = [...categories].sort((a, b) => b.total - a.total);
+
+    return {
+      series: [{ name: 'Spese', data: sorted.map(c => c.total) }],
+      chart: {
+        type: 'bar',
+        height: Math.max(220, sorted.length * 44),
+        toolbar: { show: false },
+        zoom: { enabled: false },
+        background: 'transparent',
+        fontFamily: 'inherit',
+        animations: { enabled: true, speed: 500 },
+      },
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          barHeight: '70%',
+          borderRadius: 6,
+          borderRadiusApplication: 'end',
+        },
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (val: number) =>
+          `€ ${val.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+        style: { fontSize: '12px', fontWeight: 600, colors: ['#ffffff'] },
+        offsetX: 6,
+      },
+      colors: ['#6366f1'],
+      xaxis: {
+        categories: sorted.map(c => c.categoryDescription),
+        labels: {
+          style: { colors: '#9ca3af', fontSize: '12px', fontWeight: 500 },
+          formatter: (val: string | number) => this.formatCompact(Number(val)),
+        },
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+      },
+      yaxis: {
+        labels: {
+          style: { colors: '#6b7280', fontSize: '12px', fontWeight: 500 },
+        },
+      },
+      grid: {
+        show: true,
+        borderColor: '#eef0f7',
+        strokeDashArray: 4,
+        position: 'back',
+        xaxis: { lines: { show: true } },
+        yaxis: { lines: { show: false } },
+        padding: { left: 8, right: 8, top: 0, bottom: 0 },
+      },
+      tooltip: {
+        theme: 'light',
+        style: { fontSize: '13px', fontFamily: 'inherit' },
+        x: { show: true },
+        y: {
+          formatter: (val: number) =>
+            `€ ${val.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        },
+        marker: { show: false },
+      },
+      legend: { show: false },
+    };
   }
 
   private buildDonutOptions(items: { name: string; balance: number; color: string }[]): DonutChartOptions {

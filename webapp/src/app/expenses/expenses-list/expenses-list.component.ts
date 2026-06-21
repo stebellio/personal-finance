@@ -3,7 +3,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { TransactionService } from '../../core/services/transaction.service';
 import { AccountService } from '../../core/services/account.service';
-import { Transaction } from '../../core/models/transaction.model';
+import { Transaction, Category } from '../../core/models/transaction.model';
 import { Account } from '../../core/models/account.model';
 
 @Component({
@@ -14,6 +14,7 @@ import { Account } from '../../core/models/account.model';
 export class ExpensesListComponent implements OnInit {
   transactions: Transaction[] = [];
   accounts: Account[] = [];
+  categories: Category[] = [];
   loading = true;
   error: string | null = null;
 
@@ -40,11 +41,12 @@ export class ExpensesListComponent implements OnInit {
   modalMode: 'create' | 'edit' = 'create';
   editingId: number | null = null;
 
-  formData: { accountId: number | null; amount: number; date: string; note: string } = {
+  formData: { accountId: number | null; amount: number; date: string; note: string; categoryId: number | null } = {
     accountId: null,
     amount: 0,
     date: '',
     note: '',
+    categoryId: null,
   };
 
   saving = false;
@@ -80,6 +82,11 @@ export class ExpensesListComponent implements OnInit {
     return this.accounts.find(a => a.id === accountId)?.name ?? `Conto #${accountId}`;
   }
 
+  categoryName(categoryId: number | undefined): string {
+    if (categoryId == null) return '';
+    return this.categories.find(c => c.id === categoryId)?.description ?? '';
+  }
+
   isExpense(amount: number): boolean {
     return amount < 0;
   }
@@ -102,6 +109,7 @@ export class ExpensesListComponent implements OnInit {
       amount: 0,
       date: `${yyyy}-${mm}-${dd}`,
       note: '',
+      categoryId: null,
     };
     this.saveError = null;
     this.modalMode = 'create';
@@ -115,6 +123,7 @@ export class ExpensesListComponent implements OnInit {
       amount: t.amount,
       date: t.date.substring(0, 10),
       note: t.note ?? '',
+      categoryId: t.categoryId ?? null,
     };
     this.saveError = null;
     this.modalMode = 'edit';
@@ -184,6 +193,7 @@ export class ExpensesListComponent implements OnInit {
         amount: this.formData.amount,
         date: this.formData.date,
         note: this.formData.note.trim() || undefined,
+        categoryId: this.formData.categoryId ?? undefined,
       })
       .pipe(finalize(() => (this.saving = false)))
       .subscribe({
@@ -207,6 +217,7 @@ export class ExpensesListComponent implements OnInit {
         date: this.formData.date,
         note: note || null,
         accountId: this.formData.accountId!,
+        categoryId: this.formData.categoryId ?? null,
       })
       .pipe(finalize(() => (this.saving = false)))
       .subscribe({
@@ -225,14 +236,16 @@ export class ExpensesListComponent implements OnInit {
     this.error = null;
     forkJoin({
       accounts: this.accountService.getAccounts().pipe(catchError(() => of<Account[]>([]))),
+      categories: this.transactionService.getCategories().pipe(catchError(() => of<Category[]>([]))),
       transactions: this.transactionService
         .getTransactions(...this.monthRange())
         .pipe(catchError(() => of<Transaction[]>([]))),
     })
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: ({ accounts, transactions }) => {
+        next: ({ accounts, categories, transactions }) => {
           this.accounts = accounts;
+          this.categories = categories;
           this.transactions = transactions;
         },
         error: () => {

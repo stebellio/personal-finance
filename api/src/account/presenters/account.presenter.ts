@@ -7,21 +7,24 @@ export class AccountPresenter {
   balance?: number;
   currency?: string;
   type: AccountType;
+  createdAt: Date;
 
   constructor(
     id: number,
     name: string,
     description: string,
     type: AccountType,
+    createdAt: Date,
     balance?: number,
     currency?: string,
   ) {
     this.id = id;
     this.name = name;
     this.description = description;
+    this.type = type;
+    this.createdAt = createdAt;
     this.balance = balance;
     this.currency = currency;
-    this.type = type;
   }
 
   static fromModel(account: Account): AccountPresenter {
@@ -30,6 +33,7 @@ export class AccountPresenter {
       account.name,
       account.description ?? "",
       account.type,
+      account.createdAt,
       account.balance,
       account.currency ?? "EUR",
     );

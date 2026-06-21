@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { Account } from '../models/account.model';
 
@@ -16,11 +15,11 @@ export class AccountService {
       .get<Account[]>(`${this.apiUrl}/accounts`)
   }
 
-  createAccount(payload: { name: string; description?: string; balance?: number; type?: string }): Observable<number> {
+  createAccount(payload: { name: string; description?: string; balance?: number; type?: string; createdAt?: string }): Observable<number> {
     return this.http.post<number>(`${this.apiUrl}/accounts`, payload);
   }
 
-  updateAccount(id: number, payload: { name: string; description?: string; type?: string }): Observable<void> {
+  updateAccount(id: number, payload: { name: string; description?: string; type?: string; createdAt?: string }): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/accounts/${id}`, payload);
   }
 

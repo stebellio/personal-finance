@@ -20,6 +20,7 @@ export class TransactionService {
     amount: number;
     date: Date;
     note?: string;
+    categoryId?: number;
   }): Promise<Transaction> {
     const account = await this.accountRepository.findByIdAndUserId(
       data.accountId,
@@ -35,6 +36,7 @@ export class TransactionService {
       amount: data.amount,
       date: data.date,
       note: data.note,
+      categoryId: data.categoryId,
     });
 
     await this.accountRepository.updateBalance(
@@ -90,6 +92,7 @@ export class TransactionService {
       date?: Date;
       note?: string | null;
       accountId?: number;
+      categoryId?: number | null;
     },
   ): Promise<Transaction> {
     const transaction = await this.transactionRepository.findByIdAndUserId(

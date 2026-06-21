@@ -1,9 +1,17 @@
+export interface CategoryRef {
+  id: number;
+  code: string;
+  description: string;
+}
+
 export class Transaction {
   id: number;
   amount: number;
   date: Date;
   accountId: number;
   note?: string;
+  categoryId?: number;
+  category?: CategoryRef;
   createdAt?: Date;
   updatedAt?: Date;
 
@@ -13,6 +21,8 @@ export class Transaction {
     date: Date,
     accountId: number,
     note?: string,
+    categoryId?: number,
+    category?: CategoryRef,
     createdAt?: Date,
     updatedAt?: Date,
   ) {
@@ -21,6 +31,8 @@ export class Transaction {
     this.date = date;
     this.accountId = accountId;
     this.note = note;
+    this.categoryId = categoryId;
+    this.category = category;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }

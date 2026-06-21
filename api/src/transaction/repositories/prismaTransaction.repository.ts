@@ -5,6 +5,10 @@ import { IPrismaRepository } from "../../prisma/prismaRepository.interface";
 import { Transaction } from "../models/transaction.model";
 import { ITransactionRepository } from "./transactionRepository.interface";
 
+const transactionInclude = {
+  category: { select: { id: true, code: true, description: true } },
+};
+
 @Injectable()
 export class PrismaTransactionRepository
   implements
@@ -18,14 +22,19 @@ export class PrismaTransactionRepository
     amount: number;
     date: Date;
     note?: string;
+    categoryId?: number;
   }): Promise<Transaction> {
-    const model = await this.prismaService.transaction.create({ data });
+    const model = await this.prismaService.transaction.create({
+      data,
+      include: transactionInclude,
+    });
     return this.prismaModelToDomainModel(model);
   }
 
   async findById(id: number): Promise<Transaction | null> {
     const model = await this.prismaService.transaction.findUnique({
       where: { id },
+      include: transactionInclude,
     });
     return model ? this.prismaModelToDomainModel(model) : null;
   }
@@ -36,6 +45,7 @@ export class PrismaTransactionRepository
   ): Promise<Transaction | null> {
     const model = await this.prismaService.transaction.findFirst({
       where: { id, account: { userId } },
+      include: transactionInclude,
     });
     return model ? this.prismaModelToDomainModel(model) : null;
   }
@@ -44,6 +54,7 @@ export class PrismaTransactionRepository
     const models = await this.prismaService.transaction.findMany({
       where: { accountId },
       orderBy: { date: "desc" },
+      include: transactionInclude,
     });
     return models.map((m) => this.prismaModelToDomainModel(m));
   }
@@ -52,6 +63,7 @@ export class PrismaTransactionRepository
     const models = await this.prismaService.transaction.findMany({
       where: { account: { userId } },
       orderBy: { date: "desc" },
+      include: transactionInclude,
     });
     return models.map((m) => this.prismaModelToDomainModel(m));
   }
@@ -67,6 +79,7 @@ export class PrismaTransactionRepository
         date: { gte: start, lte: end },
       },
       orderBy: { date: "asc" },
+      include: transactionInclude,
     });
     return models.map((m) => this.prismaModelToDomainModel(m));
   }
@@ -78,11 +91,13 @@ export class PrismaTransactionRepository
       date?: Date;
       note?: string | null;
       accountId?: number;
+      categoryId?: number | null;
     },
   ): Promise<Transaction> {
     const model = await this.prismaService.transaction.update({
       where: { id },
       data,
+      include: transactionInclude,
     });
     return this.prismaModelToDomainModel(model);
   }
@@ -92,14 +107,19 @@ export class PrismaTransactionRepository
   }
 
   prismaModelToDomainModel(prismaModel: PrismaTransaction): Transaction {
+    const model = prismaModel as PrismaTransaction & {
+      category?: { id: number; code: string; description: string } | null;
+    };
     return new Transaction(
-      prismaModel.id,
-      prismaModel.amount,
-      prismaModel.date,
-      prismaModel.accountId,
-      prismaModel.note ?? undefined,
-      prismaModel.createdAt,
-      prismaModel.updatedAt,
+      model.id,
+      model.amount,
+      model.date,
+      model.accountId,
+      model.note ?? undefined,
+      model.categoryId ?? undefined,
+      model.category ?? undefined,
+      model.createdAt,
+      model.updatedAt,
     );
   }
 }

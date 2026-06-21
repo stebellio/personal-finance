@@ -8,6 +8,7 @@ export interface IAccountRepository {
     balance: number;
     currency: string;
     type: AccountType;
+    createdAt?: Date;
   }): Promise<number>;
 
   findByIdAndUserId(id: number, userId: number): Promise<Account | null>;
@@ -22,6 +23,11 @@ export interface IAccountRepository {
 
   update(
     id: number,
-    data: { name?: string; description?: string; type?: AccountType },
+    data: {
+      name?: string;
+      description?: string;
+      type?: AccountType;
+      createdAt?: Date;
+    },
   ): Promise<void>;
 }

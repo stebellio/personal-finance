@@ -191,6 +191,17 @@
         ></textarea>
       </div>
 
+      <div class="form-field">
+        <label for="account-created-at">Data creazione <span class="form-field__optional">(opzionale)</span></label>
+        <input
+          id="account-created-at"
+          type="date"
+          name="createdAt"
+          [(ngModel)]="formData.createdAt"
+          autocomplete="off"
+        />
+      </div>
+
       <div class="modal__alert" *ngIf="saveError" role="alert">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>

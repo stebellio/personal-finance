@@ -23,7 +23,8 @@ export class AccountsListComponent implements OnInit {
     description: string;
     balance: number;
     type: AccountType;
-  } = { name: '', description: '', balance: 0, type: 'checking' };
+    createdAt: string;
+  } = { name: '', description: '', balance: 0, type: 'checking', createdAt: '' };
 
   saving = false;
   saveError: string | null = null;
@@ -50,7 +51,7 @@ export class AccountsListComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    this.formData = { name: '', description: '', balance: 0, type: 'checking' };
+    this.formData = { name: '', description: '', balance: 0, type: 'checking', createdAt: '' };
     this.saveError = null;
     this.modalMode = 'create';
     this.editingAccountId = null;
@@ -63,6 +64,7 @@ export class AccountsListComponent implements OnInit {
       description: account.description ?? '',
       balance: account.balance ?? 0,
       type: account.type ?? 'checking',
+      createdAt: account.createdAt ? account.createdAt.substring(0, 10) : '',
     };
     this.saveError = null;
     this.modalMode = 'edit';
@@ -126,7 +128,7 @@ export class AccountsListComponent implements OnInit {
     this.saving = true;
     this.saveError = null;
     this.accountService
-      .createAccount({ name, description: description || undefined, balance, type: this.formData.type })
+      .createAccount({ name, description: description || undefined, balance, type: this.formData.type, createdAt: this.formData.createdAt || undefined })
       .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {
@@ -144,7 +146,12 @@ export class AccountsListComponent implements OnInit {
     this.saving = true;
     this.saveError = null;
     this.accountService
-      .updateAccount(this.editingAccountId!, { name, description: description || undefined, type: this.formData.type })
+      .updateAccount(this.editingAccountId!, {
+        name,
+        description: description || undefined,
+        type: this.formData.type,
+        createdAt: this.formData.createdAt || undefined,
+      })
       .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {

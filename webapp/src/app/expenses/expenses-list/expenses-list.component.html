@@ -67,6 +67,7 @@
         <div class="row__info">
           <h3>{{ t.note || (isExpense(t.amount) ? 'Uscita' : 'Entrata') }}</h3>
           <p>{{ accountName(t.accountId) }} &middot; {{ t.date | date:'d MMM yyyy':'':'it-IT' }}</p>
+          <p class="row__category" *ngIf="t.category">{{ t.category.description }}</p>
         </div>
         <div class="row__amount" [class.row__amount--expense]="isExpense(t.amount)" [class.row__amount--income]="!isExpense(t.amount)">
           {{ t.amount | currency:'EUR':'symbol':'1.2-2':'it-IT' }}
@@ -215,6 +216,14 @@
           placeholder="Es. Supermercato"
           autocomplete="off"
         />
+      </div>
+
+      <div class="form-field">
+        <label for="tx-category">Categoria <span class="form-field__optional">(opzionale)</span></label>
+        <select id="tx-category" name="categoryId" [(ngModel)]="formData.categoryId">
+          <option [ngValue]="null">— Nessuna —</option>
+          <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.description }}</option>
+        </select>
       </div>
 
       <div class="modal__alert" *ngIf="saveError" role="alert">

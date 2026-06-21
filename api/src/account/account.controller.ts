@@ -30,6 +30,7 @@ export class AccountController {
       description?: string;
       currentBalance?: number;
       type?: AccountType;
+      createdAt?: string;
     },
   ): Promise<number> {
     return this.accountService.createAccount({
@@ -65,6 +66,7 @@ export class AccountController {
       name?: string;
       description?: string;
       type?: AccountType;
+      createdAt?: string;
     },
   ): Promise<void> {
     return this.accountService.updateAccount(id, user.id, body);

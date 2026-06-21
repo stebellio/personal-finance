@@ -55,7 +55,15 @@ export class AnalyticService {
     const txByAccount = this.groupTransactionsByAccount(transactions);
 
     for (const bucket of buckets) {
-      const bucketEnd = new Date(bucket.year, bucket.month + 1, 0, 23, 59, 59, 999);
+      const bucketEnd = new Date(
+        bucket.year,
+        bucket.month + 1,
+        0,
+        23,
+        59,
+        59,
+        999,
+      );
       let netWorth = 0;
 
       for (const account of accounts) {

@@ -30,6 +30,7 @@ export class TransactionController {
       amount: number;
       date: string;
       note?: string;
+      categoryId?: number;
     },
   ): Promise<TransactionPresenter> {
     const transaction = await this.transactionService.createTransaction({
@@ -38,6 +39,7 @@ export class TransactionController {
       amount: body.amount,
       date: new Date(body.date),
       note: body.note,
+      categoryId: body.categoryId,
     });
     return TransactionPresenter.fromModel(transaction);
   }
@@ -93,6 +95,7 @@ export class TransactionController {
       date?: string;
       note?: string | null;
       accountId?: number;
+      categoryId?: number | null;
     },
   ): Promise<TransactionPresenter> {
     const transaction = await this.transactionService.updateTransaction(
@@ -103,6 +106,7 @@ export class TransactionController {
         date: body.date ? new Date(body.date) : undefined,
         note: body.note,
         accountId: body.accountId,
+        categoryId: body.categoryId,
       },
     );
     return TransactionPresenter.fromModel(transaction);

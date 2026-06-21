@@ -39,6 +39,8 @@ describe("Transaction - TransactionService", () => {
     new Date("2026-06-20"),
     accountId,
     "Grocery shopping",
+    undefined,
+    undefined,
   );
 
   beforeEach(() => {
@@ -79,6 +81,7 @@ describe("Transaction - TransactionService", () => {
         amount: -150,
         date: baseInput.date,
         note: "Grocery shopping",
+        categoryId: undefined,
       });
       // 1000 + (-150) = 850
       expect(mockAccountRepository.updateBalance).toHaveBeenCalledWith(

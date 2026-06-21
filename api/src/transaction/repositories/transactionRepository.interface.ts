@@ -6,6 +6,7 @@ export interface ITransactionRepository {
     amount: number;
     date: Date;
     note?: string;
+    categoryId?: number;
   }): Promise<Transaction>;
 
   findById(id: number): Promise<Transaction | null>;
@@ -29,6 +30,7 @@ export interface ITransactionRepository {
       date?: Date;
       note?: string | null;
       accountId?: number;
+      categoryId?: number | null;
     },
   ): Promise<Transaction>;
 

@@ -18,6 +18,7 @@ export class PrismaAccountRepository
     balance: number;
     currency: string;
     type: AccountType;
+    createdAt?: Date;
   }): Promise<number> {
     const model = await this.prismaService.account.create({
       data,
@@ -74,7 +75,12 @@ export class PrismaAccountRepository
 
   async update(
     id: number,
-    data: { name?: string; description?: string; type?: AccountType },
+    data: {
+      name?: string;
+      description?: string;
+      type?: AccountType;
+      createdAt?: Date;
+    },
   ): Promise<void> {
     await this.prismaService.account.update({ where: { id }, data });
   }

@@ -22,6 +22,7 @@ export class AccountService {
     balance?: number;
     currency?: string;
     type?: AccountType;
+    createdAt?: string;
   }) {
     const existingAccount = await this.accountRepository.findByUserIdAndName(
       data.userId,
@@ -32,14 +33,28 @@ export class AccountService {
       throw new ConflictException("Account already exists with this name");
     }
 
-    return this.accountRepository.create({
+    const createData: {
+      name: string;
+      description?: string;
+      userId: number;
+      balance: number;
+      currency: string;
+      type: AccountType;
+      createdAt?: Date;
+    } = {
       name: data.name,
       description: data.description,
       userId: data.userId,
       balance: data.balance ?? 0,
       currency: data.currency ?? "EUR",
       type: data.type ?? "checking",
-    });
+    };
+
+    if (data.createdAt) {
+      createData.createdAt = new Date(data.createdAt);
+    }
+
+    return this.accountRepository.create(createData);
   }
 
   async getAccount(id: number, userId: number): Promise<Account> {
@@ -59,7 +74,12 @@ export class AccountService {
   async updateAccount(
     id: number,
     userId: number,
-    data: { name?: string; description?: string; type?: AccountType },
+    data: {
+      name?: string;
+      description?: string;
+      type?: AccountType;
+      createdAt?: string;
+    },
   ): Promise<void> {
     const account = await this.getAccount(id, userId);
 
@@ -73,7 +93,20 @@ export class AccountService {
       }
     }
 
-    await this.accountRepository.update(account.id, data);
+    const updateData: {
+      name?: string;
+      description?: string;
+      type?: AccountType;
+      createdAt?: Date;
+    } = {};
+
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined)
+      updateData.description = data.description;
+    if (data.type !== undefined) updateData.type = data.type;
+    if (data.createdAt) updateData.createdAt = new Date(data.createdAt);
+
+    await this.accountRepository.update(account.id, updateData);
   }
 
   async removeAccount(id: number, userId: number) {

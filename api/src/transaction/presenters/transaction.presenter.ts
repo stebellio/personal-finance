@@ -1,4 +1,4 @@
-import { Transaction } from "../models/transaction.model";
+import { Transaction, CategoryRef } from "../models/transaction.model";
 
 export class TransactionPresenter {
   id: number;
@@ -6,6 +6,8 @@ export class TransactionPresenter {
   date: string;
   accountId: number;
   note?: string;
+  categoryId?: number;
+  category?: CategoryRef;
   createdAt?: string;
   updatedAt?: string;
 
@@ -15,6 +17,8 @@ export class TransactionPresenter {
     date: Date,
     accountId: number,
     note?: string,
+    categoryId?: number,
+    category?: CategoryRef,
     createdAt?: Date,
     updatedAt?: Date,
   ) {
@@ -23,6 +27,8 @@ export class TransactionPresenter {
     this.date = date.toISOString();
     this.accountId = accountId;
     this.note = note;
+    this.categoryId = categoryId;
+    this.category = category;
     this.createdAt = createdAt?.toISOString();
     this.updatedAt = updatedAt?.toISOString();
   }
@@ -34,6 +40,8 @@ export class TransactionPresenter {
       transaction.date,
       transaction.accountId,
       transaction.note,
+      transaction.categoryId,
+      transaction.category,
       transaction.createdAt,
       transaction.updatedAt,
     );
